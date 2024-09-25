@@ -5,7 +5,7 @@ namespace Drone
 {
     public class DroneRotator : MonoBehaviour
     {
-        [SerializeField, SelfFill] private Rigidbody rb;
+        [SerializeField, ForceFill] private Rigidbody rb;
         [SerializeField] public DroneInput droneInput; // Bad, требуется вынос во вне
         [SerializeField] private Transform rotatedTransform;
 
@@ -14,12 +14,13 @@ namespace Drone
 
         [HorizontalLine("Rotate settings")]
         [SerializeField] private float rotateSpeed;
+        [SerializeField] private float angularRotateSpeed;
         [SerializeField] private float rightAngle;
         [SerializeField] private float forvardAngle;
-
-        [SerializeField] private float currentRightAngle;
-        [SerializeField] private float currentForvardAngle;
         [SerializeField] private AnimationCurve rotateCurve;
+
+        [SerializeField, ReadOnly] private float currentRightAngle;
+        [SerializeField, ReadOnly] private float currentForvardAngle;
 
         // Bad, требуется вынос во вне
         private void Awake()
@@ -30,7 +31,7 @@ namespace Drone
             Cursor.visible = false;
         }
 
-        void Update()
+        void FixedUpdate()
         {
             Vector2 input = droneInput.Drone.Rotate.ReadValue<Vector2>();
             float verticalAxis = input.y;
@@ -40,20 +41,23 @@ namespace Drone
             {
                 //Горизонтальный отклик инвертирован для корректности вращения относительно инпута
                 currentRightAngle = Mathf.Clamp(
-                    currentRightAngle -= horizontalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentRightAngle / rightAngle)),
+                    currentRightAngle -= horizontalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentRightAngle) / rightAngle),
                     -rightAngle,
                     rightAngle);
                 currentForvardAngle = Mathf.Clamp(
-                    currentForvardAngle += verticalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentForvardAngle / forvardAngle)),
+                    currentForvardAngle += verticalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentForvardAngle) / forvardAngle),
                     -forvardAngle,
                     forvardAngle);
 
-                rb.AddTorque(Vector3.up * horizontalAxis);
-                if (horizontalAxis == 0)
-                    rb.angularVelocity = Vector3.zero;
-                rotatedTransform.localRotation = Quaternion.Euler(currentForvardAngle, rb.rotation.y * Mathf.Rad2Deg, rb.rotation.z * Mathf.Rad2Deg);
+                rb.angularVelocity = (Vector3.up * horizontalAxis * angularRotateSpeed);
+
+                rotatedTransform.localRotation = Quaternion.Slerp(rotatedTransform.localRotation, Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, 0), 1);
             }
+            else if (horizontalAxis == 0)
+                rb.angularVelocity = Vector3.zero;
         }
+
+        
     }
 }
 

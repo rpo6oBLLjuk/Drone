@@ -6,8 +6,7 @@ using UnityEngine;
 public class DroneDestroyer : MonoBehaviour
 {
     [SerializeField] private List<GameObject> objectsToDestroy;
-    [SerializeField, SelfFill(true)] private DroneMover droneMover;
-    [SerializeField, SelfFill(true)] private Rigidbody rb;
+    [SerializeField, ForceFill] private Rigidbody rb;
 
     private bool isDestroy = false;
 
@@ -22,10 +21,14 @@ public class DroneDestroyer : MonoBehaviour
         foreach (GameObject t in objectsToDestroy)
         {
             t.transform.parent = null;
-            t.AddComponent<Rigidbody>().velocity = rb.velocity;
+            Rigidbody newRb = t.AddComponent<Rigidbody>();
+            newRb.velocity = rb.velocity;
+            newRb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         }
 
-        droneMover.enabled = false;
-        this.enabled = false;
+        foreach (MonoBehaviour mono in GetComponentsInChildren<MonoBehaviour>())
+        {
+            mono.enabled = false;
+        }
     }
 }
