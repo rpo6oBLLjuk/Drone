@@ -6,37 +6,39 @@ namespace Drone
     public class DroneMover : MonoBehaviour
     {
         [SerializeField, SelfFill] private Rigidbody rb;
+        [SerializeField] public DroneInput droneInput; // Bad, требуется вынос во вне
+        [SerializeField] private Transform movedTransform;
+        [SerializeField, ForceFill] private UISpeedWidget speedWidget; //Bad, требуется вынос во вне
 
-        [SerializeField] private float moveSpeed;
-        [SerializeField, Range(0, 1)] private float assereraion;
+        [HorizontalLine("Speed settings")]
+        [SerializeField] private float asseleration;
+        [SerializeField] private float maxSpeed;
 
-        [SerializeField] private float rotateSpeed;
+        [SerializeField] private Vector3 currentMovement;
+        [SerializeField] private float currentSpeed;
 
-        [SerializeField] private float upSpeed;
-
-        //bad
-        private void Start()
+        // Bad, требуется вынос во вне
+        private void Awake()
         {
+            droneInput = new();
+            droneInput.Enable();
+
             Cursor.visible = false;
         }
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Q))
-                rb.useGravity = false;
-            else if (Input.GetKeyUp(KeyCode.Q))
-                rb.useGravity = true;
+            if (droneInput.Drone.Up.IsPressed())
+            {
+                currentMovement = movedTransform.up * asseleration;
+                rb.AddForce(currentMovement * Time.deltaTime, ForceMode.Acceleration);
 
-            float verticalAxis = Input.GetAxis("Vertical");
-            float horizontalAxis = Input.GetAxis("Horizontal");
+                rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+            }
 
-            float horizontalMouseMove = Input.GetAxis("Mouse X");
-            float verticalMouseMove = Input.GetAxis("Mouse Y");
+            currentSpeed = rb.velocity.magnitude;
 
-            rb.AddForce(moveSpeed * verticalAxis * transform.forward * Time.deltaTime +
-              horizontalAxis * moveSpeed * transform.right * Time.deltaTime, ForceMode.Force);
-
-            transform.Rotate(new Vector3(0, horizontalMouseMove * rotateSpeed * Time.deltaTime, 0));
+            speedWidget.SetCurrentSpeed(currentSpeed, maxSpeed);
         }
     }
 }
