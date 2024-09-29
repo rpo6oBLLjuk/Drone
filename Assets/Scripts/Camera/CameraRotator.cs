@@ -1,18 +1,17 @@
 using DG.Tweening;
+using System;
 using UnityEngine;
 
-public class CameraRotator : MonoBehaviour
+[Serializable]
+public class CameraRotator
 {
-    [SerializeField] private Transform _camera;
-    [SerializeField] private Transform DroneTransform;
-    [SerializeField] private float rotateSpeed;
+    [SerializeField] private float rotateDuration;
 
-    private void LateUpdate()
+    public void SetCameraRotation(Transform _camera, Transform droneTransform)
     {
-        Vector3 direction = DroneTransform.position - transform.position;
+        Vector3 direction = droneTransform.position - _camera.position;
         Quaternion rotation = Quaternion.LookRotation(direction);
 
-        _camera.transform.DORotateQuaternion(rotation, rotateSpeed).SetEase(Ease.InOutSine);
-
+        _camera.transform.DORotateQuaternion(rotation, rotateDuration).SetEase(Ease.InOutSine);
     }
 }

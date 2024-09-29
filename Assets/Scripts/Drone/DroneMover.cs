@@ -25,7 +25,7 @@ namespace Drone
         [SerializeField, ReadOnly] private Vector3 currentMovement;
         [SerializeField, ProgressBar(0, nameof(maxSpeed), isReadOnly = true)] private float currentSpeed;
 
-        void FixedUpdate()
+        void Update()
         {
             if (droneInput.Drone.Up.IsPressed())
                 currentMovement = movedTransform.up * asseleration;
@@ -38,11 +38,13 @@ namespace Drone
             speedWidget.SetCurrentSpeed(currentSpeed, maxSpeed);
 
             cameraServise.SetCameraFov(currentSpeed, maxSpeed);
+        }
 
+        void FixedUpdate()
+        {
             rb.AddForce(currentMovement, ForceMode.Acceleration);
             rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
         }
-
     }
 }
 

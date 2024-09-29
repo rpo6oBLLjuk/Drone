@@ -1,30 +1,25 @@
 using CustomInspector;
+using DG.Tweening;
+using System;
 using UnityEngine;
 
-public class CameraMover : MonoBehaviour
+[Serializable]
+public class CameraMover
 {
-    [HorizontalLine("Components")]
-    [SerializeField] private Transform _camera;
-    [SerializeField] private Transform DroneTransform;
-
     [HorizontalLine("Parameters")]
     [SerializeField] private Vector3 baseOffset;
     [SerializeField] private float offsetDistance;
+    [SerializeField] private float moveDuration;
 
 
-    private void Update()
+    public void SetCameraPosition(Transform _camera, Transform droneTransform)
     {
-        SetCameraPosition(offsetDistance);
-    }
-
-    private void SetCameraPosition(float zOffset)
-    {
-        float droneY = DroneTransform.rotation.eulerAngles.y;
+        float droneY = droneTransform.rotation.eulerAngles.y;   
         float offsetX = Mathf.Sin(droneY * Mathf.Deg2Rad) * offsetDistance;
         float offsetZ = Mathf.Cos(droneY * Mathf.Deg2Rad) * offsetDistance;
 
         Debug.Log(new Vector3(offsetZ, baseOffset.y, offsetZ));
 
-        _camera.position = DroneTransform.position + new Vector3(offsetX, baseOffset.y, offsetZ);
+        _camera.position = Vector3.Lerp(_camera.position, droneTransform.position + new Vector3(offsetX, baseOffset.y, offsetZ), moveDuration);
     }
 }

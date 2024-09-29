@@ -1,5 +1,6 @@
 using Cinemachine;
 using CustomInspector;
+using DG.Tweening;
 using UnityEngine;
 
 public class CameraService : MonoBehaviour
@@ -7,16 +8,23 @@ public class CameraService : MonoBehaviour
     public Camera Camera
     {
         get => _camera;
-        set => _camera = value;
     }
     [SerializeField, ForceFill] private Camera _camera;
+    [SerializeField] private Transform droneTransform;
 
-    [SerializeField, AsRange(50, 100)] private Vector2 fov;
-
-    private CameraFovController _cameraFovController = new();
+    [SerializeField] private CameraFovController _cameraFovController = new();
+    [SerializeField] private CameraMover _cameraMover = new();
+    [SerializeField] private CameraRotator _cameraRotator = new();
 
     public void SetCameraFov(float speed, float maxSpeed)
     {
-        _cameraFovController.SetFov(_camera, speed, maxSpeed, fov.x, fov.y);
+        _cameraFovController.SetFov(_camera, speed, maxSpeed);
+    }
+
+    public void LateUpdate()
+    {
+        _camera.DOKill();
+        _cameraMover.SetCameraPosition(Camera.transform, droneTransform);
+        _cameraRotator.SetCameraRotation(Camera.transform, droneTransform);
     }
 }

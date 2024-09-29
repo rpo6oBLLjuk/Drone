@@ -1,13 +1,20 @@
 using CustomInspector;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Drone
 {
-    public class DroneRotator : MonoBehaviour
+    public class DroneRotator : MonoBehaviour, IDroneInputUser
     {
         [SerializeField, ForceFill] private Rigidbody rb;
-        [SerializeField] public DroneInput droneInput; // Bad, требуется вынос во вне
         [SerializeField] private Transform rotatedTransform;
+
+        public DroneInput DroneInput
+        {
+            get => droneInput;
+            set => droneInput = value;
+        }
+        public DroneInput droneInput;
 
         [HorizontalLine("Mouse settings")]
         [SerializeField] private float mouseRotateSpeed;
@@ -18,46 +25,56 @@ namespace Drone
         [SerializeField] private float rightAngle;
         [SerializeField] private float forvardAngle;
         [SerializeField] private AnimationCurve rotateCurve;
+        [SerializeField] private float rotateEndDuration;
 
         [SerializeField, ReadOnly] private float currentRightAngle;
         [SerializeField, ReadOnly] private float currentForvardAngle;
 
+        private float verticalAxis;
+        private float horizontalAxis;
+
+        private bool horizontalInputStoped;
+
         // Bad, требуется вынос во вне
         private void Awake()
         {
-            droneInput = new();
-            droneInput.Enable();
-
             Cursor.visible = false;
         }
 
-        void FixedUpdate()
+        void Update()
         {
-            Vector2 input = droneInput.Drone.Rotate.ReadValue<Vector2>();
-            float verticalAxis = input.y;
-            float horizontalAxis = input.x;
+            Vector2 input = DroneInput.Drone.Rotate.ReadValue<Vector2>();
+            verticalAxis = input.y;
+            horizontalAxis = input.x;
 
-            if (verticalAxis != 0f || horizontalAxis != 0f)
-            {
-                //Горизонтальный отклик инвертирован для корректности вращения относительно инпута
-                currentRightAngle = Mathf.Clamp(
-                    currentRightAngle -= horizontalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentRightAngle) / rightAngle),
-                    -rightAngle,
-                    rightAngle);
-                currentForvardAngle = Mathf.Clamp(
+            //Горизонтальный отклик инвертирован для корректности вращения относительно инпута
+            currentRightAngle = Mathf.Clamp(
+                currentRightAngle -= horizontalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentRightAngle) / rightAngle),
+                -rightAngle,
+                rightAngle);
+
+            currentForvardAngle = Mathf.Clamp(
                     currentForvardAngle += verticalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentForvardAngle) / forvardAngle),
                     -forvardAngle,
                     forvardAngle);
 
-                rb.angularVelocity = (Vector3.up * horizontalAxis * angularRotateSpeed);
+            if (horizontalAxis != 0f)
+                horizontalInputStoped = false;
 
-                rotatedTransform.localRotation = Quaternion.Slerp(rotatedTransform.localRotation, Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, 0), 1);
-            }
-            else if (horizontalAxis == 0)
-                rb.angularVelocity = Vector3.zero;
+            //rotatedTransform.localRotation = Quaternion.Slerp(rotatedTransform.localRotation, Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle), 1);
+            rotatedTransform.localRotation = Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle);
         }
 
-        
+        void FixedUpdate()
+        {
+            rb.angularVelocity = angularRotateSpeed * horizontalAxis * Vector3.up;
+
+            if (horizontalInputStoped == false)
+            {
+                horizontalInputStoped = true;
+                rb.DORotate(Vector3.zero, rotateEndDuration).SetEase(Ease.OutQuad);
+            }
+        }
     }
 }
 
