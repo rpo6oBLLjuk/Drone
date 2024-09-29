@@ -1185,7 +1185,7 @@ MonoBehaviour:
       minVector: {x: 11, y: 32, z: 9}
       myVector: {x: 11, y: 32, z: 225}
     multipleOfAttributeExamples:
-      _int: 6
+      _int: 12
       _float: 1.2
       step: 0.74
       multipleOfStep: -0.74
@@ -1329,7 +1329,7 @@ MonoBehaviour:
       c: 0
       d: 0
     validateAttributeExamples:
-      evenNumber: 2
+      evenNumber: 0
       oddNumber: 1
     array2DExamples:
       images:
