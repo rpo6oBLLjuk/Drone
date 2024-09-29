@@ -16,16 +16,12 @@ namespace Drone
         }
         public DroneInput droneInput;
 
-        [HorizontalLine("Mouse settings")]
-        [SerializeField] private float mouseRotateSpeed;
-
-        [HorizontalLine("Rotate settings")]
-        [SerializeField] private float rotateSpeed;
-        [SerializeField] private float angularRotateSpeed;
-        [SerializeField] private float rightAngle;
-        [SerializeField] private float forvardAngle;
-        [SerializeField] private AnimationCurve rotateCurve;
-        [SerializeField] private float rotateEndDuration;
+        [SerializeField, Tab("Speed")] private float rotateSpeed;
+        [SerializeField, Tab("Speed")] private float angularRotateSpeed;
+        [SerializeField, Tab("Angle")] private float rightAngle;
+        [SerializeField, Tab("Angle")] private float forvardAngle;
+        [SerializeField, Tab("Settings")] private AnimationCurve rotateCurve;
+        [SerializeField, Tab("Settings")] private float rotateEndDuration;
 
         [SerializeField, ReadOnly] private float currentRightAngle;
         [SerializeField, ReadOnly] private float currentForvardAngle;
@@ -33,7 +29,7 @@ namespace Drone
         private float verticalAxis;
         private float horizontalAxis;
 
-        private bool horizontalInputStoped;
+        //private bool horizontalInputStoped;
 
         // Bad, требуется вынос во вне
         private void Awake()
@@ -58,9 +54,6 @@ namespace Drone
                     -forvardAngle,
                     forvardAngle);
 
-            if (horizontalAxis != 0f)
-                horizontalInputStoped = false;
-
             //rotatedTransform.localRotation = Quaternion.Slerp(rotatedTransform.localRotation, Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle), 1);
             rotatedTransform.localRotation = Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle);
         }
@@ -68,12 +61,6 @@ namespace Drone
         void FixedUpdate()
         {
             rb.angularVelocity = angularRotateSpeed * horizontalAxis * Vector3.up;
-
-            if (horizontalInputStoped == false)
-            {
-                horizontalInputStoped = true;
-                rb.DORotate(Vector3.zero, rotateEndDuration).SetEase(Ease.OutQuad);
-            }
         }
     }
 }

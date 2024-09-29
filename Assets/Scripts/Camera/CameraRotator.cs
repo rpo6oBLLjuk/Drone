@@ -1,4 +1,3 @@
-using DG.Tweening;
 using System;
 using UnityEngine;
 
@@ -12,6 +11,6 @@ public class CameraRotator
         Vector3 direction = droneTransform.position - _camera.position;
         Quaternion rotation = Quaternion.LookRotation(direction);
 
-        _camera.transform.DORotateQuaternion(rotation, rotateDuration).SetEase(Ease.InOutSine);
+        _camera.transform.rotation = Quaternion.Slerp(_camera.transform.rotation, rotation, rotateDuration);
     }
 }

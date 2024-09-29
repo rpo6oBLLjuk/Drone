@@ -1,6 +1,4 @@
-using Cinemachine;
 using CustomInspector;
-using DG.Tweening;
 using UnityEngine;
 
 public class CameraService : MonoBehaviour
@@ -23,7 +21,6 @@ public class CameraService : MonoBehaviour
 
     public void LateUpdate()
     {
-        _camera.DOKill();
         _cameraMover.SetCameraPosition(Camera.transform, droneTransform);
         _cameraRotator.SetCameraRotation(Camera.transform, droneTransform);
     }

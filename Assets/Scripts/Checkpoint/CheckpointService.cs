@@ -2,9 +2,12 @@ using CustomInspector;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 
 public class CheckpointService : MonoBehaviour
 {
+    [Inject] readonly AudioService audioService;
+
     [SerializeField] private List<Point> points = new();
 
     [HorizontalLine("Colors")]
@@ -20,25 +23,25 @@ public class CheckpointService : MonoBehaviour
         foreach (var point in points)
         {
             point.pointService = this;
-            point.SetColor(inactiveColor);
+            point.SetPointInactive(inactiveColor);
         }
 
-        ActivatePoints();
+        ActivatePoints(false);
     }
 
     public void PointGetted()
     {
         Point firstPoint = points.First();
 
-        firstPoint.SetPointInactive();
+        firstPoint.SetPointInactive(inactiveColor);
         points.Remove(firstPoint);
 
         Debug.Log("Собран чек-поинт");
 
-        ActivatePoints();
+        ActivatePoints(true);
     }
 
-    public void ActivatePoints()
+    private void ActivatePoints(bool enableAudio)
     {
         if (points.Count > 0)
         {
@@ -46,16 +49,24 @@ public class CheckpointService : MonoBehaviour
             {
                 points[0].SetPointActive(activeColor);
                 points[1].SetPointPreActive(preActiveColor);
+
+                Debug.Log("Активирован следующий чек-поинт");
             }
             else
             {
                 points[0].SetPointActive(activeColor);
                 Debug.Log("Активирован последний чек-поинт");
             }
+
+            if (enableAudio)
+                audioService.PlayCheckpointCollected();
         }
         else
         {
-            Debug.Log("Уровень завершён"); //заглушка
+            if (enableAudio)
+                audioService.PlayLevelComplete();
+
+            Debug.Log("Уровень завершён");
         }
     }
 }

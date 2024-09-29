@@ -3,17 +3,21 @@ using Drone;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DroneDestroyer : MonoBehaviour
+public class DroneDestroyer : MonoBehaviour, IDroneInputUser
 {
     [SerializeField] private List<GameObject> objectsToDestroy;
     [SerializeField, ForceFill] private Rigidbody rb;
 
     private bool isDestroy = false;
 
+    public DroneInput DroneInput { get; set; }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (isDestroy)
             return;
+
+        DroneInput.Disable();
 
         isDestroy = true;
         Debug.Log("Дрон уничтожен");

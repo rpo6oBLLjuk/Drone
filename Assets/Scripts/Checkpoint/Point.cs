@@ -21,13 +21,13 @@ public class Point : MonoBehaviour
         SetColor(color);
     }
 
-    public void SetPointInactive()
+    public void SetPointInactive(Color color)
     {
-        SetColor(Color.black);
+        SetColor(color);
         active = false;
     }
 
-    public void SetColor(Color color)
+    private void SetColor(Color color)
     {
         meshRenderer.material.color = color;
     }
@@ -36,7 +36,7 @@ public class Point : MonoBehaviour
     {
         if (active)
         {
-            if (Physics.OverlapBox(transform.position, size).Count() != 0)
+            if (Physics.OverlapBox(transform.position, size, transform.rotation).Count() != 0)
                 pointService.PointGetted();
 
         }
@@ -44,6 +44,16 @@ public class Point : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position, size);
+        // Сохраняем старую матрицу
+        Matrix4x4 oldMatrix = Gizmos.matrix;
+
+        // Устанавливаем новую матрицу с вращением, позицией и масштабом объекта
+        Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+
+        // Рисуем вращаемый куб
+        Gizmos.DrawWireCube(Vector3.zero, size);
+
+        // Восстанавливаем старую матрицу
+        Gizmos.matrix = oldMatrix;
     }
 }
