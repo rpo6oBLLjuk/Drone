@@ -16,12 +16,12 @@
                 },
                 {
                     "name": "Up",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "e0808968-c30e-4193-a7f9-2bae58a6951a",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Down",
@@ -113,8 +113,30 @@
                 },
                 {
                     "name": "",
+                    "id": "605eacc2-78ad-415d-9428-78dc001113c0",
+                    "path": "<Gamepad>/rightStick/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Up",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "7942b4de-522f-4aed-84b7-bf9e71bc08e2",
                     "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Down",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "35ba2600-e911-4a2e-9445-694a4a014be9",
+                    "path": "<Gamepad>/rightStick/down",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
