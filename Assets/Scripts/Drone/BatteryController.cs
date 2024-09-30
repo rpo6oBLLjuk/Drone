@@ -25,7 +25,7 @@ public class BatteryController : MonoBehaviour, IDroneInputUser
 
     private void Update()
     {
-        if (droneInput.Drone.Up.IsPressed())
+        if (droneInput.Drone.Throttle.IsPressed())
             BatteryConsumption();
     }
 

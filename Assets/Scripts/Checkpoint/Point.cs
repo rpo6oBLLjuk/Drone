@@ -5,15 +5,14 @@ using UnityEngine;
 public class Point : MonoBehaviour
 {
     [HideInInspector] public CheckpointService pointService;
-    [SerializeField, SelfFill] private MeshRenderer meshRenderer;
-    [SerializeField] private Vector3 size;
+    [SerializeField, SelfFill(true)] private MeshRenderer meshRenderer;
 
-    bool active = false;
+    bool isActive = false;
 
     public void SetPointActive(Color color)
     {
         SetColor(color);
-        active = true;
+        isActive = true;
     }
 
     public void SetPointPreActive(Color color)
@@ -24,7 +23,7 @@ public class Point : MonoBehaviour
     public void SetPointInactive(Color color)
     {
         SetColor(color);
-        active = false;
+        isActive = false;
     }
 
     private void SetColor(Color color)
@@ -32,28 +31,11 @@ public class Point : MonoBehaviour
         meshRenderer.material.color = color;
     }
 
-    private void FixedUpdate()
+    private void OnTriggerEnter(Collider other)
     {
-        if (active)
+        if (isActive)
         {
-            if (Physics.OverlapBox(transform.position, size, transform.rotation).Count() != 0)
-                pointService.PointGetted();
-
+            pointService.PointGetted();
         }
-    }
-
-    private void OnDrawGizmos()
-    {
-        // Сохраняем старую матрицу
-        Matrix4x4 oldMatrix = Gizmos.matrix;
-
-        // Устанавливаем новую матрицу с вращением, позицией и масштабом объекта
-        Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
-
-        // Рисуем вращаемый куб
-        Gizmos.DrawWireCube(Vector3.zero, size);
-
-        // Восстанавливаем старую матрицу
-        Gizmos.matrix = oldMatrix;
     }
 }

@@ -25,22 +25,10 @@ public class AudioService : MonoBehaviour, IDroneInputUser
 
     public void Update()
     {
-        float upValue = DroneInput.Drone.Up.ReadValue<float>();
-        float downValue = DroneInput.Drone.Down.ReadValue<float>();
+        float throttleValue = DroneInput.Drone.Throttle.ReadValue<float>();
 
-        float speed = 0;
-        bool isUp = true;
-
-        if(upValue > 0)
-        {
-            isUp = true;
-            speed = upValue;
-        }
-        else if(downValue > 0)
-        {
-            isUp = false;
-            speed = downValue;
-        }
+        float speed = throttleValue;
+        bool isUp = throttleValue > 0;
 
         droneScrewSoundPlayer.Update(droneScrewAudioSourve, speed, isUp);
     }

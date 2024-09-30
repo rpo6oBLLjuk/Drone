@@ -5,12 +5,7 @@ namespace Drone
 {
     public class DroneMover : MonoBehaviour, IDroneInputUser
     {
-        public DroneInput DroneInput
-        {
-            get => droneInput;
-            set => droneInput = value;
-        }
-        public DroneInput droneInput;
+        public DroneInput DroneInput { get; set; }
 
         [SerializeField, ForceFill] private CameraService cameraServise;
         [SerializeField, ForceFill] private Rigidbody rb;
@@ -19,7 +14,7 @@ namespace Drone
         [SerializeField, ForceFill] private UISpeedWidget speedWidget; //Bad, требуется вынос во вне
 
         [HorizontalLine("Speed settings")]
-        [SerializeField] private float asseleration;
+        [SerializeField] private AnimationCurve asseleration;
         [SerializeField] private float maxSpeed;
 
         [SerializeField, ReadOnly] private Vector3 currentMovement;
@@ -27,17 +22,14 @@ namespace Drone
 
         void Update()
         {
-            if (droneInput.Drone.Up.IsPressed())
-                currentMovement = movedTransform.up * asseleration;
-            else if (droneInput.Drone.Down.IsPressed())
-                currentMovement = -1 * asseleration * movedTransform.up;
-            else
-                currentMovement = Vector3.zero;
+            float inputValue = asseleration.Evaluate(DroneInput.Drone.Throttle.ReadValue<float>());
 
-            currentSpeed = rb.velocity.magnitude;
+            currentMovement = inputValue * maxSpeed * movedTransform.up;
+
+            currentSpeed = Mathf.Abs(inputValue * maxSpeed);
             speedWidget.SetCurrentSpeed(currentSpeed, maxSpeed);
 
-            cameraServise.SetCameraFov(currentSpeed, maxSpeed);
+            cameraServise.SetCameraFov(rb.velocity.magnitude, maxSpeed);
         }
 
         void FixedUpdate()

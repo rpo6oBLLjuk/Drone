@@ -37,22 +37,13 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Up"",
+                    ""name"": ""Throttle"",
                     ""type"": ""Value"",
-                    ""id"": ""e0808968-c30e-4193-a7f9-2bae58a6951a"",
+                    ""id"": ""13b77d2d-ea02-4851-970a-caa396e325c6"",
                     ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""Down"",
-                    ""type"": ""Button"",
-                    ""id"": ""238224a0-3bbc-4ce2-9e0e-5c028a6a7e92"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -124,45 +115,23 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""a86958f5-ba62-420a-bc51-550ec92aae44"",
-                    ""path"": ""<Keyboard>/q"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Up"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""605eacc2-78ad-415d-9428-78dc001113c0"",
+                    ""id"": ""f04cea76-806d-4771-bc1c-29bb105e4326"",
                     ""path"": ""<Gamepad>/rightStick/up"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Up"",
+                    ""action"": ""Throttle"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""7942b4de-522f-4aed-84b7-bf9e71bc08e2"",
-                    ""path"": ""<Keyboard>/e"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Down"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""35ba2600-e911-4a2e-9445-694a4a014be9"",
+                    ""id"": ""e79d0edb-8780-45ec-be8d-a0b615b8fd22"",
                     ""path"": ""<Gamepad>/rightStick/down"",
                     ""interactions"": """",
-                    ""processors"": """",
+                    ""processors"": ""Invert"",
                     ""groups"": """",
-                    ""action"": ""Down"",
+                    ""action"": ""Throttle"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -174,8 +143,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         // Drone
         m_Drone = asset.FindActionMap("Drone", throwIfNotFound: true);
         m_Drone_Rotate = m_Drone.FindAction("Rotate", throwIfNotFound: true);
-        m_Drone_Up = m_Drone.FindAction("Up", throwIfNotFound: true);
-        m_Drone_Down = m_Drone.FindAction("Down", throwIfNotFound: true);
+        m_Drone_Throttle = m_Drone.FindAction("Throttle", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -238,15 +206,13 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Drone;
     private List<IDroneActions> m_DroneActionsCallbackInterfaces = new List<IDroneActions>();
     private readonly InputAction m_Drone_Rotate;
-    private readonly InputAction m_Drone_Up;
-    private readonly InputAction m_Drone_Down;
+    private readonly InputAction m_Drone_Throttle;
     public struct DroneActions
     {
         private @DroneInput m_Wrapper;
         public DroneActions(@DroneInput wrapper) { m_Wrapper = wrapper; }
         public InputAction @Rotate => m_Wrapper.m_Drone_Rotate;
-        public InputAction @Up => m_Wrapper.m_Drone_Up;
-        public InputAction @Down => m_Wrapper.m_Drone_Down;
+        public InputAction @Throttle => m_Wrapper.m_Drone_Throttle;
         public InputActionMap Get() { return m_Wrapper.m_Drone; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -259,12 +225,9 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
             @Rotate.started += instance.OnRotate;
             @Rotate.performed += instance.OnRotate;
             @Rotate.canceled += instance.OnRotate;
-            @Up.started += instance.OnUp;
-            @Up.performed += instance.OnUp;
-            @Up.canceled += instance.OnUp;
-            @Down.started += instance.OnDown;
-            @Down.performed += instance.OnDown;
-            @Down.canceled += instance.OnDown;
+            @Throttle.started += instance.OnThrottle;
+            @Throttle.performed += instance.OnThrottle;
+            @Throttle.canceled += instance.OnThrottle;
         }
 
         private void UnregisterCallbacks(IDroneActions instance)
@@ -272,12 +235,9 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
             @Rotate.started -= instance.OnRotate;
             @Rotate.performed -= instance.OnRotate;
             @Rotate.canceled -= instance.OnRotate;
-            @Up.started -= instance.OnUp;
-            @Up.performed -= instance.OnUp;
-            @Up.canceled -= instance.OnUp;
-            @Down.started -= instance.OnDown;
-            @Down.performed -= instance.OnDown;
-            @Down.canceled -= instance.OnDown;
+            @Throttle.started -= instance.OnThrottle;
+            @Throttle.performed -= instance.OnThrottle;
+            @Throttle.canceled -= instance.OnThrottle;
         }
 
         public void RemoveCallbacks(IDroneActions instance)
@@ -298,7 +258,6 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
     public interface IDroneActions
     {
         void OnRotate(InputAction.CallbackContext context);
-        void OnUp(InputAction.CallbackContext context);
-        void OnDown(InputAction.CallbackContext context);
+        void OnThrottle(InputAction.CallbackContext context);
     }
 }

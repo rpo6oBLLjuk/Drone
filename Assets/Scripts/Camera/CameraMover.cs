@@ -17,8 +17,6 @@ public class CameraMover
         float offsetX = Mathf.Sin(droneY * Mathf.Deg2Rad) * offsetDistance;
         float offsetZ = Mathf.Cos(droneY * Mathf.Deg2Rad) * offsetDistance;
 
-        Debug.Log(new Vector3(offsetZ, baseOffset.y, offsetZ));
-
         _camera.position = Vector3.Slerp(_camera.position, droneTransform.position + new Vector3(offsetX, baseOffset.y, offsetZ), moveDuration);
     }
 }

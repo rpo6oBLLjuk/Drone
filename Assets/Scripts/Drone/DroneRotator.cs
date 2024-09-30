@@ -1,5 +1,4 @@
 using CustomInspector;
-using DG.Tweening;
 using UnityEngine;
 
 namespace Drone
@@ -19,7 +18,7 @@ namespace Drone
         [SerializeField, Tab("Speed")] private float rotateSpeed;
         [SerializeField, Tab("Speed")] private float angularRotateSpeed;
         [SerializeField, Tab("Angle")] private float rightAngle;
-        [SerializeField, Tab("Angle")] private float forvardAngle;
+        [SerializeField, Tab("Angle")] private float verticalAngle;
         [SerializeField, Tab("Settings")] private AnimationCurve rotateCurve;
         [SerializeField, Tab("Settings")] private float rotateEndDuration;
 
@@ -29,39 +28,37 @@ namespace Drone
         private float verticalAxis;
         private float horizontalAxis;
 
-        //private bool horizontalInputStoped;
-
-        // Bad, требуется вынос во вне
-        private void Awake()
-        {
-            Cursor.visible = false;
-        }
+        private bool onCollision = false;
 
         void Update()
         {
+            if (onCollision)
+                return;
+
             Vector2 input = DroneInput.Drone.Rotate.ReadValue<Vector2>();
             verticalAxis = input.y;
             horizontalAxis = input.x;
 
             //Горизонтальный отклик инвертирован для корректности вращения относительно инпута
-            currentRightAngle = Mathf.Clamp(
-                currentRightAngle -= horizontalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentRightAngle) / rightAngle),
-                -rightAngle,
-                rightAngle);
+            currentRightAngle = -horizontalAxis * rightAngle;
 
-            currentForvardAngle = Mathf.Clamp(
-                    currentForvardAngle += verticalAxis * rotateSpeed * Time.deltaTime * rotateCurve.Evaluate(Mathf.Abs(currentForvardAngle) / forvardAngle),
-                    -forvardAngle,
-                    forvardAngle);
+            currentForvardAngle = verticalAxis * verticalAngle;
 
             //rotatedTransform.localRotation = Quaternion.Slerp(rotatedTransform.localRotation, Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle), 1);
-            rotatedTransform.localRotation = Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle);
+            //rotatedTransform.localRotation = Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle);
+            Quaternion newRotation = Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle);
+
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, newRotation, rotateEndDuration));
+
         }
 
         void FixedUpdate()
         {
             rb.angularVelocity = angularRotateSpeed * horizontalAxis * Vector3.up;
         }
+
+        private void OnCollisionEnter(Collision collision) => onCollision = true;
+        private void OnCollisionExit(Collision collision) => onCollision = false;
     }
 }
 

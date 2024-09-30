@@ -9,14 +9,9 @@ public class DroneAnimator : MonoBehaviour, IDroneInputUser
 
     void Update()
     {
-        if (DroneInput.Drone.Up.IsPressed())
-        {
-            RotateScrews(rotatesInSecond * Time.deltaTime);
-        }
-        else if (DroneInput.Drone.Down.IsPressed())
-        {
-            RotateScrews(-rotatesInSecond * Time.deltaTime);
-        }
+        float inputValue = DroneInput.Drone.Throttle.ReadValue<float>();
+
+        RotateScrews(rotatesInSecond * Time.deltaTime * Mathf.Sign(inputValue));
     }
 
     private void RotateScrews(float angle)
