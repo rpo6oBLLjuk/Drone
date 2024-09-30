@@ -7,6 +7,7 @@ public class DroneDestroyer : MonoBehaviour, IDroneInputUser
 {
     [SerializeField] private List<GameObject> objectsToDestroy;
     [SerializeField, ForceFill] private Rigidbody rb;
+    [SerializeField, Layer] private int saveLayers;
 
     private bool isDestroy = false;
 
@@ -14,6 +15,9 @@ public class DroneDestroyer : MonoBehaviour, IDroneInputUser
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.layer == saveLayers)
+            return;
+
         if (isDestroy)
             return;
 
