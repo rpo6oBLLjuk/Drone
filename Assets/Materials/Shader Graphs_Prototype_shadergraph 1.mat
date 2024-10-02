@@ -56,8 +56,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _LerpValue: 0
+    - _Offset: 0
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _Tiling: 0
     m_Colors:
     - _Offset: {r: 0.505, g: 0.505, b: 0, a: 0}
     - _Tiling: {r: 0.3, g: 0.3, b: 0, a: 0}
