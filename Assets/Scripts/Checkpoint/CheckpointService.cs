@@ -1,72 +1,44 @@
-using CustomInspector;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Zenject;
 
-public class CheckpointService : MonoBehaviour
+public class CheckpointService : MonoBehaviour, IDroneInputUser
 {
-    [Inject] readonly AudioService audioService;
+    [Inject] public readonly AudioService audioService;
+    [Inject] public readonly UIService uiService;
+    public Action<float> CheckpointsComplete;
 
-    [SerializeField] private List<Point> points = new();
+    public DroneInput DroneInput { get; set; }
 
-    [HorizontalLine("Colors")]
-    [ColorUsage(true, true)]
-    [SerializeField] private Color activeColor;
-    [ColorUsage(true, true)]
-    [SerializeField] private Color preActiveColor;
-    [ColorUsage(true, true)]
-    [SerializeField] private Color inactiveColor;
+    [SerializeField] private PointsSwitcher pointsSwitcher = new();
+    [SerializeField] private LevelTimeRecorder levelTimeRecorder = new();
+
+    private bool inputStarted = false;
 
     private void Start()
     {
-        foreach (var point in points)
-        {
-            point.pointService = this;
-            point.SetPointInactive(inactiveColor);
-        }
-
-        ActivatePoints(false);
+        pointsSwitcher.Start(this);
+        DroneInput.Drone.Throttle.started += InputActivateHandler;
     }
 
     public void PointGetted()
     {
-        Point firstPoint = points.First();
-
-        firstPoint.SetPointInactive(inactiveColor);
-        points.Remove(firstPoint);
-
-        Debug.Log("Собран чек-поинт");
-
-        ActivatePoints(true);
+        pointsSwitcher.PointGetted();
+        levelTimeRecorder.PointGetted();
     }
 
-    private void ActivatePoints(bool enableAudio)
+    private void InputActivateHandler(InputAction.CallbackContext context)
     {
-        if (points.Count > 0)
+        if (!inputStarted)
         {
-            if (points.First() != points.Last())
-            {
-                points[0].SetPointActive(activeColor);
-                points[1].SetPointPreActive(preActiveColor);
-
-                Debug.Log("Активирован следующий чек-поинт");
-            }
-            else
-            {
-                points[0].SetPointActive(activeColor);
-                Debug.Log("Активирован последний чек-поинт");
-            }
-
-            if (enableAudio)
-                audioService.PlayCheckpointCollected();
+            inputStarted = true;
+            levelTimeRecorder.Start(this);
         }
-        else
-        {
-            if (enableAudio)
-                audioService.PlayLevelComplete();
+    }
 
-            Debug.Log("Уровень завершён");
-        }
+    private void OnDisable()
+    {
+        DroneInput.Drone.Throttle.started -= InputActivateHandler;
     }
 }
