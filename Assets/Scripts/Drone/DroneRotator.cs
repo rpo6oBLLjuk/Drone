@@ -49,7 +49,6 @@ namespace Drone
             Quaternion newRotation = Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle);
 
             rb.MoveRotation(Quaternion.Slerp(rb.rotation, newRotation, rotateEndDuration));
-
         }
 
         void FixedUpdate()
