@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UISpeedWidget : MonoBehaviour
+[Serializable]
+public class UISpeedWidget
 {
-    public Image image;
+    [SerializeField] private Image image;
 
     public void SetCurrentSpeed(float speed, float maxSpeed)
     {
