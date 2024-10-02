@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [Serializable]
@@ -12,11 +13,12 @@ public class LevelTimeRecorderWidget
 
     public void AddTime(float time, int checkpointNumber)
     {
-        time = Mathf.Round(time * 1000) / 1000;
+        string newTime = string.Format("{0:0.000}", time);
 
-        TextMeshProUGUI newText = UnityEngine.Object.Instantiate(baseTMPro).GetComponent<TextMeshProUGUI>();
+        GameObject newObj = UnityEngine.Object.Instantiate(baseTMPro);
+        newObj.transform.SetParent(parentContainer);
 
-        newText.transform.SetParent(parentContainer);
-        newText.text = $"{checkpointNameText}{checkpointNumber}, {checkpointTimeText}{time}";
+        TextMeshProUGUI newText = newObj.GetComponentInChildren<TextMeshProUGUI>();
+        newText.text = $"{checkpointNameText}{checkpointNumber}, {checkpointTimeText}{newTime}";
     }
 }

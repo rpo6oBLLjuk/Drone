@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 public class Bootstrap : MonoBehaviour
@@ -8,12 +7,5 @@ public class Bootstrap : MonoBehaviour
     public void Awake()
     {
         Cursor.visible = cursorVisible;
-        DroneInput droneInput = new();
-        droneInput.Enable();
-
-        foreach (IDroneInputUser user in FindObjectsOfType<MonoBehaviour>().Where((thisClass)=> thisClass is IDroneInputUser))
-        {
-            user.DroneInput = droneInput;
-        }
     }
 }

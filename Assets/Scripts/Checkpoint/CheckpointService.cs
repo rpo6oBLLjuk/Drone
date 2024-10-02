@@ -7,6 +7,8 @@ public class CheckpointService : MonoBehaviour, IDroneInputUser
 {
     [Inject] public readonly AudioService audioService;
     [Inject] public readonly UIService uiService;
+    [Inject] public readonly GamepadService gamepadService;
+
     public Action<float> CheckpointsComplete;
 
     public DroneInput DroneInput { get; set; }
@@ -26,6 +28,8 @@ public class CheckpointService : MonoBehaviour, IDroneInputUser
     {
         pointsSwitcher.PointGetted();
         levelTimeRecorder.PointGetted();
+
+        gamepadService.SetVibration();
     }
 
     private void InputActivateHandler(InputAction.CallbackContext context)

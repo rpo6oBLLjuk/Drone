@@ -19,7 +19,7 @@ namespace Drone
         [SerializeField, Tab("Speed")] private float angularRotateSpeed;
         [SerializeField, Tab("Angle")] private float rightAngle;
         [SerializeField, Tab("Angle")] private float verticalAngle;
-        [SerializeField, Tab("Settings")] private AnimationCurve rotateCurve;
+        //[SerializeField, Tab("Settings")] private AnimationCurve rotateCurve;
         [SerializeField, Tab("Settings")] private float rotateEndDuration;
 
         [SerializeField, ReadOnly] private float currentRightAngle;
