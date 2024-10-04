@@ -19,14 +19,18 @@ public class GamepadService : MonoBehaviour
 
         gamepadVibrationController.gamepadService = this;
 
-        foreach (IDroneInputUser user in FindObjectsOfType<MonoBehaviour>().Where((thisClass) => thisClass is IDroneInputUser).Cast<IDroneInputUser>())
-        {
-            user.DroneInput = droneInput;
-        }
+        FindDroneInputUsers();
     }
 
     public void SetVibration() => gamepadVibrationController.SetVibration();
 
     public void SetVibration(float strength, float time) => gamepadVibrationController.SetVibration(strength, time);
 
+    private void FindDroneInputUsers()
+    {
+        foreach (IDroneInputUser user in FindObjectsOfType<MonoBehaviour>().Where((thisClass) => thisClass is IDroneInputUser).Cast<IDroneInputUser>())
+        {
+            user.DroneInput = droneInput;
+        }
+    }
 }

@@ -1,3 +1,4 @@
+using CustomInspector;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
@@ -6,7 +7,7 @@ using UnityEngine;
 [Serializable]
 public class GamepadVibrationController
 {
-    public GamepadService gamepadService;
+    [HideField] public GamepadService gamepadService;
 
     [SerializeField] private float maxVibration;
 
@@ -28,6 +29,9 @@ public class GamepadVibrationController
 
     private void SetGamepadMotorSpeeds(float strength, float duration)
     {
+        if (strength <= 0 || duration <= 0)
+            return;
+
         gamepadService.Gamepad.SetMotorSpeeds(strength, strength);
 
         VibrationOffDelay(duration, vibrationTokenSource).RunWithCancellation(vibrationTokenSource);
@@ -39,7 +43,7 @@ public class GamepadVibrationController
 
         gamepadService.Gamepad.PauseHaptics();
         gamepadService.Gamepad.ResetHaptics();
-        
+
         Debug.Log("Вибрация завершена");
     }
 }

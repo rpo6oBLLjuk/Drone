@@ -24,7 +24,8 @@ namespace Drone
         void Update()
         {
             float input = DroneInput.Drone.Throttle.ReadValue<float>();
-            inputValue = asseleration.Evaluate(Mathf.Abs(input)) * Mathf.Sign(input);
+            //inputValue = asseleration.Evaluate(Mathf.Abs(input)) * Mathf.Sign(input);
+            inputValue = input;
 
             currentMovement = inputValue * maxSpeed * movedTransform.up;
 

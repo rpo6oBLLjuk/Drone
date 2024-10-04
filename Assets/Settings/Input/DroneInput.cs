@@ -164,6 +164,94 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""UI"",
+            ""id"": ""aec9bfa8-0fc3-4100-bce5-3a65c61274c3"",
+            ""actions"": [
+                {
+                    ""name"": ""Options"",
+                    ""type"": ""Button"",
+                    ""id"": ""67b2e679-60d5-4b4e-89af-726d98a1630f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveRightSettingMenu"",
+                    ""type"": ""Button"",
+                    ""id"": ""65cffcdb-9f20-4217-b623-d1d16df4eb3d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveLeftSettingMenu"",
+                    ""type"": ""Button"",
+                    ""id"": ""ad100d6e-e41a-4cd2-b2e1-850ac4cc092d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Move"",
+                    ""type"": ""Value"",
+                    ""id"": ""4ca7aaf3-a1cc-4121-aa2a-b09825e50dcb"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""20d3ce17-4ba5-4a07-88f5-a7a2d110b000"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Options"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""40a87539-8bc7-46a7-bdad-646d49ccf240"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveRightSettingMenu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""12a89c83-736c-4fa0-9583-37f8ec655b40"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveLeftSettingMenu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b789fc60-790c-41eb-93d9-5ae0c6c45777"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -175,6 +263,12 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         // Camera
         m_Camera = asset.FindActionMap("Camera", throwIfNotFound: true);
         m_Camera_Rotate = m_Camera.FindAction("Rotate", throwIfNotFound: true);
+        // UI
+        m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
+        m_UI_Options = m_UI.FindAction("Options", throwIfNotFound: true);
+        m_UI_MoveRightSettingMenu = m_UI.FindAction("MoveRightSettingMenu", throwIfNotFound: true);
+        m_UI_MoveLeftSettingMenu = m_UI.FindAction("MoveLeftSettingMenu", throwIfNotFound: true);
+        m_UI_Move = m_UI.FindAction("Move", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -332,6 +426,76 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         }
     }
     public CameraActions @Camera => new CameraActions(this);
+
+    // UI
+    private readonly InputActionMap m_UI;
+    private List<IUIActions> m_UIActionsCallbackInterfaces = new List<IUIActions>();
+    private readonly InputAction m_UI_Options;
+    private readonly InputAction m_UI_MoveRightSettingMenu;
+    private readonly InputAction m_UI_MoveLeftSettingMenu;
+    private readonly InputAction m_UI_Move;
+    public struct UIActions
+    {
+        private @DroneInput m_Wrapper;
+        public UIActions(@DroneInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Options => m_Wrapper.m_UI_Options;
+        public InputAction @MoveRightSettingMenu => m_Wrapper.m_UI_MoveRightSettingMenu;
+        public InputAction @MoveLeftSettingMenu => m_Wrapper.m_UI_MoveLeftSettingMenu;
+        public InputAction @Move => m_Wrapper.m_UI_Move;
+        public InputActionMap Get() { return m_Wrapper.m_UI; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(UIActions set) { return set.Get(); }
+        public void AddCallbacks(IUIActions instance)
+        {
+            if (instance == null || m_Wrapper.m_UIActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_UIActionsCallbackInterfaces.Add(instance);
+            @Options.started += instance.OnOptions;
+            @Options.performed += instance.OnOptions;
+            @Options.canceled += instance.OnOptions;
+            @MoveRightSettingMenu.started += instance.OnMoveRightSettingMenu;
+            @MoveRightSettingMenu.performed += instance.OnMoveRightSettingMenu;
+            @MoveRightSettingMenu.canceled += instance.OnMoveRightSettingMenu;
+            @MoveLeftSettingMenu.started += instance.OnMoveLeftSettingMenu;
+            @MoveLeftSettingMenu.performed += instance.OnMoveLeftSettingMenu;
+            @MoveLeftSettingMenu.canceled += instance.OnMoveLeftSettingMenu;
+            @Move.started += instance.OnMove;
+            @Move.performed += instance.OnMove;
+            @Move.canceled += instance.OnMove;
+        }
+
+        private void UnregisterCallbacks(IUIActions instance)
+        {
+            @Options.started -= instance.OnOptions;
+            @Options.performed -= instance.OnOptions;
+            @Options.canceled -= instance.OnOptions;
+            @MoveRightSettingMenu.started -= instance.OnMoveRightSettingMenu;
+            @MoveRightSettingMenu.performed -= instance.OnMoveRightSettingMenu;
+            @MoveRightSettingMenu.canceled -= instance.OnMoveRightSettingMenu;
+            @MoveLeftSettingMenu.started -= instance.OnMoveLeftSettingMenu;
+            @MoveLeftSettingMenu.performed -= instance.OnMoveLeftSettingMenu;
+            @MoveLeftSettingMenu.canceled -= instance.OnMoveLeftSettingMenu;
+            @Move.started -= instance.OnMove;
+            @Move.performed -= instance.OnMove;
+            @Move.canceled -= instance.OnMove;
+        }
+
+        public void RemoveCallbacks(IUIActions instance)
+        {
+            if (m_Wrapper.m_UIActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IUIActions instance)
+        {
+            foreach (var item in m_Wrapper.m_UIActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_UIActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public UIActions @UI => new UIActions(this);
     public interface IDroneActions
     {
         void OnRotate(InputAction.CallbackContext context);
@@ -340,5 +504,12 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
     public interface ICameraActions
     {
         void OnRotate(InputAction.CallbackContext context);
+    }
+    public interface IUIActions
+    {
+        void OnOptions(InputAction.CallbackContext context);
+        void OnMoveRightSettingMenu(InputAction.CallbackContext context);
+        void OnMoveLeftSettingMenu(InputAction.CallbackContext context);
+        void OnMove(InputAction.CallbackContext context);
     }
 }
