@@ -1,15 +1,24 @@
 using System;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 [Serializable]
-public class LevelTimeRecorderWidget
+public class LevelTimeRecorderWidget : IUIWidget
 {
+    public CanvasGroup Widget
+    {
+        get => widget;
+        set => widget = value;
+    }
+    [SerializeField] private CanvasGroup widget;
+
     [SerializeField] private GameObject baseTMPro;
     [SerializeField] private Transform parentContainer;
     [SerializeField] private string checkpointNameText = "Checkpoint: ";
     [SerializeField] private string checkpointTimeText = "Time: ";
+
+
+
 
     public void AddTime(float time, int checkpointNumber)
     {
