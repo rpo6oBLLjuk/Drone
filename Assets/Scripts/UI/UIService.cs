@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class UIService : MonoBehaviour, IDroneInputUser
 {
@@ -10,19 +9,13 @@ public class UIService : MonoBehaviour, IDroneInputUser
     private void Start()
     {
         uiWidgetsController.Start(DroneInput);
-
-        DroneInput.UI.Options.started += (InputAction.CallbackContext context) => uiWidgetsController.OptionsButton();
-
-        DroneInput.UI.MoveRightSettingMenu.started += (InputAction.CallbackContext context) => uiWidgetsController.uiOptions.ChangeActiveMenu(1);
-        DroneInput.UI.MoveLeftSettingMenu.started += (InputAction.CallbackContext context) => uiWidgetsController.uiOptions.ChangeActiveMenu(-1);
-
     }
 
     void Update()
     {
-        if (DroneInput.UI.Move.IsPressed())
+        if (DroneInput.UI.VerticalMove.IsPressed())
         {
-            uiWidgetsController.uiOptions.MoveScrollRect(DroneInput.UI.Move.ReadValue<Vector2>());
+            uiWidgetsController.uiOptionsController.MoveScrollRect(DroneInput.UI.VerticalMove.ReadValue<float>());
         }
     }
 

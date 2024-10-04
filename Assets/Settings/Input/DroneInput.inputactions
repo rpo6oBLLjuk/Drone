@@ -157,7 +157,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "MoveRightSettingMenu",
+                    "name": "SettingMenuMove",
                     "type": "Button",
                     "id": "65cffcdb-9f20-4217-b623-d1d16df4eb3d",
                     "expectedControlType": "Button",
@@ -166,22 +166,22 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "MoveLeftSettingMenu",
+                    "name": "VerticalMove",
+                    "type": "Value",
+                    "id": "4ca7aaf3-a1cc-4121-aa2a-b09825e50dcb",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Quit",
                     "type": "Button",
-                    "id": "ad100d6e-e41a-4cd2-b2e1-850ac4cc092d",
+                    "id": "58aa42d8-5908-4661-afaf-cfb05862eb83",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "Move",
-                    "type": "Value",
-                    "id": "4ca7aaf3-a1cc-4121-aa2a-b09825e50dcb",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -203,29 +203,51 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MoveRightSettingMenu",
+                    "action": "SettingMenuMove",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "12a89c83-736c-4fa0-9583-37f8ec655b40",
+                    "id": "53e1ae3c-9313-40f0-b74a-42559147569d",
                     "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
-                    "processors": "",
+                    "processors": "Invert",
                     "groups": "",
-                    "action": "MoveLeftSettingMenu",
+                    "action": "SettingMenuMove",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "b789fc60-790c-41eb-93d9-5ae0c6c45777",
-                    "path": "<Gamepad>/rightStick",
+                    "path": "<Gamepad>/dpad/up",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Move",
+                    "action": "VerticalMove",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "16f4fdb1-0994-4528-a145-25209f813d5e",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "Invert",
+                    "groups": "",
+                    "action": "VerticalMove",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3faf0460-219f-4f43-a628-046b18da1431",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

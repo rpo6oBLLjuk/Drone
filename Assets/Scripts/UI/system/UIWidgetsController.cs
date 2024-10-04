@@ -1,15 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 [Serializable]
 public class UIWidgetsController
 {
     public UISpeedWidget speedWidget = new();
     public LevelTimeRecorderWidget levelTimeRecorderWidget = new();
-    public UIOptions uiOptions = new();
+    public UIOptionsController uiOptionsController = new();
 
     private List<IUIWidget> widgets = new();
+
+    private List<IUIWidget[]> widgetSequence;
 
     private DroneInput droneInput;
 
@@ -17,54 +22,71 @@ public class UIWidgetsController
     {
         droneInput = input;
 
-        widgets.Add(speedWidget);
-        (speedWidget as IUIWidget).ShowWidget();
+        AddWidgetsToPool();
+        AddListeners();
 
-        widgets.Add(levelTimeRecorderWidget);
-        (levelTimeRecorderWidget as IUIWidget).ShowWidget();
-
-        widgets.Add(uiOptions);
-        (uiOptions as IUIWidget).HideWidget();
-        uiOptions.Start();
+        uiOptionsController.Start();
     }
 
     public void OptionsButton()
     {
-        if (uiOptions.Widget.alpha == 1)
+        if (uiOptionsController.Widget.alpha == 1)
         {
-            HideOneWidget<UIOptions>(() => Time.timeScale = 1);
+            HideWidgetGroup(new IUIWidget[] { levelTimeRecorderWidget, uiOptionsController });
+
             droneInput.UI.Disable();
             droneInput.Drone.Enable();
         }
         else
         {
             Time.timeScale = 0;
-            ShowOneWidget<UIOptions>(() => Time.timeScale = 0);
+
+            ShowWidgetGroup(new IUIWidget[] { uiOptionsController });
+
             droneInput.UI.Enable();
             droneInput.Drone.Disable();
         }
     }
 
-    private void ShowOneWidget<T>(Action action = null)
+    private void ShowWidgetGroup(IUIWidget[] showedWidgets)
     {
-        foreach (var widget in widgets)
+        widgetSequence.Add(showedWidgets);
+
+        foreach (IUIWidget widget in showedWidgets)
         {
-            if (widget is T)
-                widget.ShowWidget(action);
-            else
-                widget.HideWidget();
+            widget.ShowWidget();
         }
     }
 
-    //До добавления более чем двух групп виджетов
-    private void HideOneWidget<T>(Action action = null)
+    private void HideWidgetGroup(IUIWidget[] hidedWidgets)
     {
-        foreach (var widget in widgets)
+        foreach (IUIWidget widget in hidedWidgets)
         {
-            if (widget is T)
-                widget.HideWidget(action);
-            else
-                widget.ShowWidget();
+            widget.HideWidget();
         }
+
+        widgetSequence.Remove(hidedWidgets);
+    }
+
+
+    private void AddWidgetsToPool()
+    {
+        widgets.Add(speedWidget);
+        (speedWidget as IUIWidget).Widget.alpha = 0;
+
+        widgets.Add(levelTimeRecorderWidget);
+        (levelTimeRecorderWidget as IUIWidget).Widget.alpha = 0;
+
+        widgets.Add(uiOptionsController);
+        (uiOptionsController as IUIWidget).Widget.alpha = 0;
+    }
+
+    private void AddListeners()
+    {
+        droneInput.UI.Quit.started += (InputAction.CallbackContext context) => HideWidgetGroup(widgetSequence.Last());
+
+        droneInput.UI.Options.started += (InputAction.CallbackContext context) => OptionsButton();
+
+        droneInput.UI.SettingMenuMove.started += (InputAction.CallbackContext context) => uiOptionsController.ChangeActiveMenu(context.ReadValue<float>());
     }
 }

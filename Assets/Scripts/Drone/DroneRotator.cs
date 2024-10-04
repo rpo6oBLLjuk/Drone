@@ -15,12 +15,12 @@ namespace Drone
         }
         public DroneInput droneInput;
 
-        [SerializeField, Tab("Speed")] private float rotateSpeed;
         [SerializeField, Tab("Speed")] private float angularRotateSpeed;
+        [SerializeField, Tab("Speed")] private float rotateDuration;
+
         [SerializeField, Tab("Angle")] private float rightAngle;
         [SerializeField, Tab("Angle")] private float verticalAngle;
         //[SerializeField, Tab("Settings")] private AnimationCurve rotateCurve;
-        [SerializeField, Tab("Settings")] private float rotateEndDuration;
 
         [SerializeField, ReadOnly] private float currentRightAngle;
         [SerializeField, ReadOnly] private float currentForvardAngle;
@@ -48,7 +48,7 @@ namespace Drone
             //rotatedTransform.localRotation = Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle);
             Quaternion newRotation = Quaternion.Euler(currentForvardAngle, rotatedTransform.localRotation.eulerAngles.y, currentRightAngle);
 
-            rb.MoveRotation(Quaternion.Slerp(rb.rotation, newRotation, rotateEndDuration));
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, newRotation, rotateDuration));
         }
 
         void FixedUpdate()
