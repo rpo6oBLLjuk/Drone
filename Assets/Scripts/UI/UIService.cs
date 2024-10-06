@@ -13,10 +13,7 @@ public class UIService : MonoBehaviour, IDroneInputUser
 
     void Update()
     {
-        if (DroneInput.UI.VerticalMove.IsPressed())
-        {
-            uiWidgetsController.uiOptionsController.MoveScrollRect(DroneInput.UI.VerticalMove.ReadValue<float>());
-        }
+        uiWidgetsController.Update();
     }
 
     public void SetCurrentSpeed(float speed, float maxSpeed)

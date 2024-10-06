@@ -1195,10 +1195,10 @@ MonoBehaviour:
       icon: {fileID: 0}
     progressBarAttributeExamples:
       value1: 0.6
-      value2: 22
+      value2: 44
       value3: 2
       min: 1
-      max: 3
+      max: 3.32
     readOnlyAttributeExamples:
       n: 0
       gob: {fileID: 0}

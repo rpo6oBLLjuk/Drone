@@ -12,29 +12,17 @@ public abstract class IUIWidget
     }
     [SerializeField] private CanvasGroup _widget;
 
-    public bool HaveContent => _haveContent;
-    [SerializeField] private bool _haveContent;
 
-    public void ShowWidget(Action myAction = null)
+    public virtual void ShowWidget()
     {
         Widget.interactable = true;
-        Widget.DOFade(1, 0.5f)
-            .SetUpdate(true)
-            .OnComplete(() => myAction?.Invoke());
-
-        if (_haveContent)
-            SetFocus();
+        Widget.DOFade(1, 0.25f)
+            .SetUpdate(true);
     }
-    public void HideWidget(Action myAction = null)
+    public virtual void HideWidget()
     {
         Widget.interactable = false;
-        Widget.DOFade(0, 0.5f)
-            .SetUpdate(true)
-            .OnComplete(() => myAction?.Invoke());
-    }
-
-    private void SetFocus()
-    {
-
+        Widget.DOFade(0, 0.25f)
+            .SetUpdate(true);
     }
 }

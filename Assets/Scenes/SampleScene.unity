@@ -4238,31 +4238,43 @@ MonoBehaviour:
   uiWidgetsController:
     speedWidget:
       _widget: {fileID: 1315716936}
-      _haveContent: 0
       image: {fileID: 484542203}
     levelTimeRecorderWidget:
       _widget: {fileID: 2092073195}
-      _haveContent: 0
       baseTMPro: {fileID: 2980966635572873214, guid: 6f81d358ec1a1ff49af6523eca7c71e4,
         type: 3}
       parentContainer: {fileID: 232280800}
       checkpointNameText: 'Checkpoint: '
       checkpointTimeText: 'Time: '
-    uiOptionsController:
+    optionsController:
       _widget: {fileID: 847637178}
-      _haveContent: 0
+      tabs:
+      - {fileID: 2060874194}
+      - {fileID: 1822028959}
+      - {fileID: 514121568}
+      currentTabIndex: 0
+      changeTabIndexDuration: 0.5
+      currentChangeTabIndexTime: 0.5
+      tabActiveColor: {r: 0.19215687, g: 1, b: 0.20392157, a: 1}
+      tabInactiveColor: {r: 0.82745105, g: 0.82745105, b: 0.82745105, a: 1}
+      contentContainers:
+      - {fileID: 376841774}
+      - {fileID: 800384405}
+      - {fileID: 1397990181}
+      currentContentIndex: 0
       scrollRect: {fileID: 1238192433}
-      scrollSpeed: 0.000002
-      settings_menu:
-      - settingTab: {fileID: 2060874194}
-        settingsContainer: {fileID: 376841774}
-      - settingTab: {fileID: 1822028959}
-        settingsContainer: {fileID: 800384405}
-      - settingTab: {fileID: 514121568}
-        settingsContainer: {fileID: 1397990181}
-      activeColor: {r: 0.3999071, g: 1, b: 0.39811313, a: 1}
-      inactiveColor: {r: 0.82745105, g: 0.82745105, b: 0.82745105, a: 1}
-      activeMenuIndex: 0
+      changeContentIndexDuration: 0.5
+      currentChangeContentIndexTime: 0.5
+      contentActiveColor: {r: 1, g: 0.51886785, b: 0.51886785, a: 1}
+      contentInactiveColor: {r: 1, g: 1, b: 1, a: 1}
+    pauseWidget:
+      _widget: {fileID: 0}
+      tabs: []
+      currentTabIndex: 0
+      changeTabIndexDuration: 0.5
+      currentChangeTabIndexTime: 0.5
+      tabActiveColor: {r: 0, g: 0, b: 0, a: 0}
+      tabInactiveColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &523579292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6659,7 +6671,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000024795532, y: 0.000015953086}
+  m_AnchoredPosition: {x: 0.000024795532, y: -0.000004524365}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &813081669
@@ -11106,8 +11118,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1250, y: -150}
-  m_SizeDelta: {x: 2500, y: 0}
+  m_AnchoredPosition: {x: 930, y: -150}
+  m_SizeDelta: {x: 1860, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1397990183
 MonoBehaviour:

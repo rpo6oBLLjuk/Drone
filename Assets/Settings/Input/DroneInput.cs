@@ -180,12 +180,12 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": ""SettingMenuMove"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""65cffcdb-9f20-4217-b623-d1d16df4eb3d"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""VerticalMove"",
