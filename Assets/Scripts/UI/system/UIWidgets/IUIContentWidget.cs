@@ -1,4 +1,5 @@
 using CustomInspector;
+using ModestTree;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,15 +10,15 @@ using UnityEngine.UIElements;
 public class IUIContentWidget : IUITabWidget
 {
     [SerializeField] protected List<GameObject> contentContainers = new();
-    private Dictionary<GameObject, List<GameObject>> contents = new();
+    private List<GameObject> currentContent = new();
 
     public int CurrentContentIndex
     {
-        get => Mathf.Clamp(currentContentIndex, 0, contents[contentContainers[currentTabIndex]].Count - 1);
+        get => Mathf.Clamp(currentContentIndex, 0, currentContent.Count - 1);
         set
         {
-            int lastIndex = Mathf.Clamp(currentContentIndex, 0, contents[contentContainers[currentTabIndex]].Count - 1);
-            currentContentIndex = Mathf.Clamp(value, 0, contents[contentContainers[currentTabIndex]].Count - 1);
+            int lastIndex = Mathf.Clamp(currentContentIndex, 0, currentContent.Count - 1);
+            currentContentIndex = Mathf.Clamp(value, 0, currentContent.Count - 1);
             SetContentFocus(lastIndex, currentContentIndex);
         }
     }
@@ -33,27 +34,28 @@ public class IUIContentWidget : IUITabWidget
 
     public virtual void Start()
     {
-        foreach (GameObject container in contentContainers)
+        if(contentContainers.Count != tabs.Count)
         {
-            List<GameObject> list = container
-                .GetComponentsInChildren<Transform>(true)
-                .Where(transform => container.transform != transform)
-                .Select(transform => transform.gameObject)
-                .ToList();
-
-            contents.Add(container, list);
-
-            Debug.Log($"Content: {container.name}, count: {contents[container].Count}");
+            Debug.LogError("Ошибка IUIContent виджета: количество tab-элементов не соответствует количеству content-элементов");
+            Debug.Break();
         }
-    }
 
-    public override void ShowWidget()
-    {
-        base.ShowWidget();
+        SetCurrentContent();
 
-        CurrentContentIndex = 0;
+        //Ранее сохранялись все списки контента. Теперь сохраняется лишь 1 актуальный список, однако код оставлен в качестве "запасного"
+        //
+        //foreach (GameObject container in contentContainers)
+        //{
+        //    List<GameObject> list = container
+        //        .GetComponentsInChildren<Transform>(true)
+        //        .Where(transform => container.transform != transform)
+        //        .Select(transform => transform.gameObject)
+        //        .ToList();
 
-        currentChangeContentIndexTime = changeContentIndexDuration;
+        //    currentContents.Add(container, list);
+
+        //    Debug.Log($"Content: {container.name}, count: {currentContents[container].Count}");
+        //}
     }
 
     public override void ActivateFocused()
@@ -63,14 +65,14 @@ public class IUIContentWidget : IUITabWidget
 
     public void ContentMovement(float axis)
     {
-        CalculateChangeContentIndexTime(axis);
+        CalculateChangeContentIndexTime(axis, false);
     }
 
-    public void CalculateChangeContentIndexTime(float inputAxis)
+    public void CalculateChangeContentIndexTime(float inputAxis, bool forceChange)
     {
         currentChangeContentIndexTime += Time.unscaledDeltaTime;
 
-        if (currentChangeContentIndexTime > changeContentIndexDuration)
+        if (currentChangeContentIndexTime > changeContentIndexDuration || forceChange)
         {
             currentChangeContentIndexTime = 0;
             CurrentContentIndex += (int)Mathf.Sign(inputAxis);
@@ -80,6 +82,12 @@ public class IUIContentWidget : IUITabWidget
     protected override void SetTabFocus(int lastIndex, int newIndex)
     {
         base.SetTabFocus(lastIndex, newIndex);
+
+        currentContent[lastIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
+
+        SetCurrentContent();
+
+        currentChangeContentIndexTime = 0;
 
         ChangeContentContainer(lastIndex, newIndex);
     }
@@ -95,15 +103,28 @@ public class IUIContentWidget : IUITabWidget
 
     protected virtual void SetContentFocus(int lastIndex, int newIndex)
     {
-        contents[contentContainers[newIndex]][lastIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentInactiveColor;
-        contents[contentContainers[newIndex]][newIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentActiveColor;
+        currentContent[lastIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
+        currentContent[newIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentActiveColor;
+
+        //Аналогично описанному выше
+        //currentContents[contentContainers[newIndex]][lastIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentInactiveColor;
+        //currentContents[contentContainers[newIndex]][newIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentActiveColor;
 
         EventSystem.current.SetSelectedGameObject(tabs[newIndex]);
 
+        //Код прокрутки ScrollRect за элементом, будет введён позже
         //RectTransform scrollView = scrollRect.viewport;
         //if (!RectTransformUtility.RectangleContainsScreenPoint(scrollView, contentContainers[currentContentIndex].transform.position))
         //{
         //    scrollRect.verticalNormalizedPosition = 1 - (float)currentContentIndex / (contentContainers.Count - 1);
         //}
+    }
+
+    private void SetCurrentContent()
+    {
+        currentContent = contentContainers[currentTabIndex].GetComponentsInChildren<Transform>(true)
+                .Where(transform => contentContainers[currentTabIndex].transform != transform)
+                .Select(transform => transform.gameObject)
+                .ToList();
     }
 }

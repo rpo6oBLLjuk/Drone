@@ -69,6 +69,8 @@ public class PointsSwitcher
             if (enableAudio)
                 checkpointService.audioService.PlayLevelComplete();
 
+            checkpointService.DroneInput.Drone.Disable();
+
             Debug.Log("Уровень завершён");
         }
     }

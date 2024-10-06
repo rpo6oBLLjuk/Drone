@@ -21,7 +21,7 @@ public class DroneDestroyer : MonoBehaviour, IDroneInputUser
         if (isDestroy)
             return;
 
-        DroneInput.Disable();
+        DroneInput.Drone.Disable();
 
         isDestroy = true;
         Debug.Log("Дрон уничтожен");

@@ -28,21 +28,21 @@ public class IUITabWidget : IUIWidget
     {
         base.ShowWidget();
 
-        ChangeTabIndex(0);
+        CurrentTabIndex = 0;
 
-        currentChangeTabIndexTime = changeTabIndexDuration;
+        currentChangeTabIndexTime = 0;
     }
 
     public void TabMovement(float inputAxis)
     {
-        CalculateChangeTabIndexTime(inputAxis);
+        CalculateChangeTabIndexTime(inputAxis, false);
     }
 
-    public void CalculateChangeTabIndexTime(float inputAxis)
+    public void CalculateChangeTabIndexTime(float inputAxis, bool forceChange)
     {
         currentChangeTabIndexTime += Time.unscaledDeltaTime;
 
-        if (currentChangeTabIndexTime > changeTabIndexDuration)
+        if (currentChangeTabIndexTime > changeTabIndexDuration || forceChange)
         {
             currentChangeTabIndexTime = 0;
             ChangeTabIndex(inputAxis);
@@ -57,6 +57,7 @@ public class IUITabWidget : IUIWidget
     private void ChangeTabIndex(float value)
     {
         CurrentTabIndex += (int)Mathf.Sign(value);
+        Debug.Log("Tab changed");
     }
 
     protected virtual void SetTabFocus(int lastIndex, int newIndex)

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class UIService : MonoBehaviour, IDroneInputUser
 {
-    [SerializeField] private UIWidgetsController uiWidgetsController;
+    [SerializeField] private UIWidgetsController uiWidgetsController = new();
 
     public DroneInput DroneInput { get; set; }
 

@@ -32,7 +32,7 @@ public class GamepadVibrationController
         if (strength <= 0 || duration <= 0)
             return;
 
-        gamepadService.Gamepad.SetMotorSpeeds(strength, strength);
+        gamepadService.Gamepad.SetMotorSpeeds(strength, strength / 2);
 
         VibrationOffDelay(duration, vibrationTokenSource).RunWithCancellation(vibrationTokenSource);
     }
