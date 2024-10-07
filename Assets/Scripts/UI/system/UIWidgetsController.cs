@@ -11,6 +11,7 @@ public class UIWidgetsController
     public UIOptionsController optionsController = new();
     public UIPauseWidget pauseWidget = new();
     public FPSWidget FPSWidget = new();
+    public GameEndWidget gameEndWidget = new();
 
     private List<(IUIWidget[], bool)> widgetSequence = new();
 
@@ -41,7 +42,7 @@ public class UIWidgetsController
         FPSWidget.Update();
     }
 
-    private void ShowWidgetGroup((IUIWidget[], bool) showedWidgets)
+    public void ShowWidgetGroup((IUIWidget[], bool) showedWidgets)
     {
         widgetSequence.Add(showedWidgets);
 
@@ -73,6 +74,8 @@ public class UIWidgetsController
 
         FPSWidget.Widget.alpha = 0;
 
+        gameEndWidget.Widget.alpha = 0;
+
 
         ShowWidgetGroup((new IUIWidget[] { speedWidget, levelTimeRecorderWidget, FPSWidget }, false));
 
@@ -92,5 +95,10 @@ public class UIWidgetsController
 
         droneInput.UI.VerticalMove.started += (InputAction.CallbackContext context) => optionsController.CalculateChangeContentIndexTime(context.ReadValue<float>(), true);
         droneInput.UI.SettingMenuMove.started += (InputAction.CallbackContext context) => optionsController.CalculateChangeTabIndexTime(context.ReadValue<float>(), true);
+
+        droneInput.UI.Apply.started += (InputAction.CallbackContext context) => widgetSequence.Last()
+                                                                                    .Item1
+                                                                                    .First()
+                                                                                    .Apply();
     }
 }

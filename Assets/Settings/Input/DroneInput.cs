@@ -191,7 +191,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""name"": ""VerticalMove"",
                     ""type"": ""Value"",
                     ""id"": ""4ca7aaf3-a1cc-4121-aa2a-b09825e50dcb"",
-                    ""expectedControlType"": ""Axis"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -200,6 +200,15 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""name"": ""Quit"",
                     ""type"": ""Button"",
                     ""id"": ""58aa42d8-5908-4661-afaf-cfb05862eb83"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Apply"",
+                    ""type"": ""Button"",
+                    ""id"": ""4a4aec9b-0e10-441d-9194-db2cc3ea3298"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -245,7 +254,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""id"": ""b789fc60-790c-41eb-93d9-5ae0c6c45777"",
                     ""path"": ""<Gamepad>/dpad/up"",
                     ""interactions"": """",
-                    ""processors"": """",
+                    ""processors"": ""Invert"",
                     ""groups"": """",
                     ""action"": ""VerticalMove"",
                     ""isComposite"": false,
@@ -256,7 +265,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""id"": ""16f4fdb1-0994-4528-a145-25209f813d5e"",
                     ""path"": ""<Gamepad>/dpad/down"",
                     ""interactions"": """",
-                    ""processors"": ""Invert"",
+                    ""processors"": """",
                     ""groups"": """",
                     ""action"": ""VerticalMove"",
                     ""isComposite"": false,
@@ -270,6 +279,17 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Quit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cbbbb74e-d520-4703-a98f-d97d450d1e40"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Apply"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -291,6 +311,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         m_UI_SettingMenuMove = m_UI.FindAction("SettingMenuMove", throwIfNotFound: true);
         m_UI_VerticalMove = m_UI.FindAction("VerticalMove", throwIfNotFound: true);
         m_UI_Quit = m_UI.FindAction("Quit", throwIfNotFound: true);
+        m_UI_Apply = m_UI.FindAction("Apply", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -456,6 +477,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_SettingMenuMove;
     private readonly InputAction m_UI_VerticalMove;
     private readonly InputAction m_UI_Quit;
+    private readonly InputAction m_UI_Apply;
     public struct UIActions
     {
         private @DroneInput m_Wrapper;
@@ -464,6 +486,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         public InputAction @SettingMenuMove => m_Wrapper.m_UI_SettingMenuMove;
         public InputAction @VerticalMove => m_Wrapper.m_UI_VerticalMove;
         public InputAction @Quit => m_Wrapper.m_UI_Quit;
+        public InputAction @Apply => m_Wrapper.m_UI_Apply;
         public InputActionMap Get() { return m_Wrapper.m_UI; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -485,6 +508,9 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
             @Quit.started += instance.OnQuit;
             @Quit.performed += instance.OnQuit;
             @Quit.canceled += instance.OnQuit;
+            @Apply.started += instance.OnApply;
+            @Apply.performed += instance.OnApply;
+            @Apply.canceled += instance.OnApply;
         }
 
         private void UnregisterCallbacks(IUIActions instance)
@@ -501,6 +527,9 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
             @Quit.started -= instance.OnQuit;
             @Quit.performed -= instance.OnQuit;
             @Quit.canceled -= instance.OnQuit;
+            @Apply.started -= instance.OnApply;
+            @Apply.performed -= instance.OnApply;
+            @Apply.canceled -= instance.OnApply;
         }
 
         public void RemoveCallbacks(IUIActions instance)
@@ -533,5 +562,6 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         void OnSettingMenuMove(InputAction.CallbackContext context);
         void OnVerticalMove(InputAction.CallbackContext context);
         void OnQuit(InputAction.CallbackContext context);
+        void OnApply(InputAction.CallbackContext context);
     }
 }

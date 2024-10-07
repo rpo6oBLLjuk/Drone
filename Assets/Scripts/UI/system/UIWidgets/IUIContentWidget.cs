@@ -1,5 +1,4 @@
 using CustomInspector;
-using ModestTree;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,14 +9,14 @@ using UnityEngine.UIElements;
 public class IUIContentWidget : IUITabWidget
 {
     [SerializeField] protected List<GameObject> contentContainers = new();
-    private List<GameObject> currentContent = new();
+    [SerializeField, ReadOnly] private List<GameObject> currentContent = new();
 
     public int CurrentContentIndex
     {
         get => Mathf.Clamp(currentContentIndex, 0, currentContent.Count - 1);
         set
         {
-            int lastIndex = Mathf.Clamp(currentContentIndex, 0, currentContent.Count - 1);
+            int lastIndex = currentContentIndex;
             currentContentIndex = Mathf.Clamp(value, 0, currentContent.Count - 1);
             SetContentFocus(lastIndex, currentContentIndex);
         }
@@ -34,7 +33,7 @@ public class IUIContentWidget : IUITabWidget
 
     public virtual void Start()
     {
-        if(contentContainers.Count != tabs.Count)
+        if (contentContainers.Count != tabs.Count)
         {
             Debug.LogError("Ошибка IUIContent виджета: количество tab-элементов не соответствует количеству content-элементов");
             Debug.Break();
@@ -83,12 +82,11 @@ public class IUIContentWidget : IUITabWidget
     {
         base.SetTabFocus(lastIndex, newIndex);
 
-        currentContent[lastIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
-
-        SetCurrentContent();
+        currentContent[currentContentIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
 
         currentChangeContentIndexTime = 0;
 
+        SetCurrentContent();
         ChangeContentContainer(lastIndex, newIndex);
     }
 
@@ -97,34 +95,50 @@ public class IUIContentWidget : IUITabWidget
     {
         contentContainers[lastIndex].SetActive(false);
         contentContainers[newIndex].SetActive(true);
-
-        CurrentContentIndex = 0;
     }
 
     protected virtual void SetContentFocus(int lastIndex, int newIndex)
     {
-        currentContent[lastIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
-        currentContent[newIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentActiveColor;
+        try
+        {
+            currentContent[lastIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
+            currentContent[newIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentActiveColor;
+        }
+        catch
+        {
+            Debug.LogError($"LastIndex: {lastIndex}, NewIndex: {newIndex}");
+        }
 
         //Аналогично описанному выше
         //currentContents[contentContainers[newIndex]][lastIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentInactiveColor;
         //currentContents[contentContainers[newIndex]][newIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentActiveColor;
 
-        EventSystem.current.SetSelectedGameObject(tabs[newIndex]);
+        //Планировалась активация элемента навигаци активного списка
+        //EventSystem.current.SetSelectedGameObject(currentContent[newIndex]);
 
         //Код прокрутки ScrollRect за элементом, будет введён позже
-        //RectTransform scrollView = scrollRect.viewport;
-        //if (!RectTransformUtility.RectangleContainsScreenPoint(scrollView, contentContainers[currentContentIndex].transform.position))
-        //{
-        //    scrollRect.verticalNormalizedPosition = 1 - (float)currentContentIndex / (contentContainers.Count - 1);
-        //}
+        RectTransform scrollView = scrollRect.viewport;
+        float baseValue = scrollView.rect.height / (currentContent[0].transform as RectTransform).rect.height;
+        if (!RectTransformUtility.RectangleContainsScreenPoint(scrollView, currentContent[currentContentIndex].transform.position))
+        {
+            float sign = (float)(lastIndex - newIndex);
+            float verticalPosition = sign * (1 / (currentContent.Count - baseValue));
+            scrollRect.verticalNormalizedPosition += verticalPosition;
+
+            Debug.Log($"{verticalPosition}");
+        }
     }
 
     private void SetCurrentContent()
     {
+        currentContentIndex = 0;
+
         currentContent = contentContainers[currentTabIndex].GetComponentsInChildren<Transform>(true)
-                .Where(transform => contentContainers[currentTabIndex].transform != transform)
+                .Where(transform => contentContainers[currentTabIndex].transform != transform
+                    && contentContainers[currentTabIndex].transform == transform.parent)
                 .Select(transform => transform.gameObject)
                 .ToList();
+
+        CurrentContentIndex = 0;
     }
 }

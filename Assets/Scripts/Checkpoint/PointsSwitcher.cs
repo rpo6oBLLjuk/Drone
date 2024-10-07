@@ -71,6 +71,8 @@ public class PointsSwitcher
 
             checkpointService.DroneInput.Drone.Disable();
 
+            GameStateController.End(true);
+
             Debug.Log("Уровень завершён");
         }
     }

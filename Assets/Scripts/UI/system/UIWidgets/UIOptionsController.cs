@@ -10,9 +10,12 @@ public class UIOptionsController : IUIContentWidget
     {
         base.ShowWidget();
 
-        droneInput.Drone.Disable();
+        if (canBeShow)
+        {
+            droneInput.Drone.Disable();
 
-        Time.timeScale = 0;
+            Time.timeScale = 0;
+        }
     }
 
     public override void HideWidget()

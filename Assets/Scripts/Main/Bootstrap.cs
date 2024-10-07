@@ -8,4 +8,9 @@ public class Bootstrap : MonoBehaviour
     {
         Cursor.visible = cursorVisible;
     }
+
+    public void Start()
+    {
+        GameStateController.Start();
+    }
 }

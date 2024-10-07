@@ -1,3 +1,4 @@
+using CustomInspector;
 using DG.Tweening;
 using System;
 using UnityEngine;
@@ -12,17 +13,29 @@ public abstract class IUIWidget
     }
     [SerializeField] private CanvasGroup _widget;
 
+    [SerializeField] protected float animDuration;
+
+    [SerializeField, ReadOnly] public bool canBeShow = true;
+
 
     public virtual void ShowWidget()
     {
-        Widget.interactable = true;
-        Widget.DOFade(1, 0.25f)
-            .SetUpdate(true);
+        if (canBeShow)
+        {
+            Widget.interactable = true;
+            Widget.DOFade(1, animDuration)
+                .SetUpdate(true);
+        }
     }
     public virtual void HideWidget()
     {
         Widget.interactable = false;
-        Widget.DOFade(0, 0.25f)
+        Widget.DOFade(0, animDuration)
             .SetUpdate(true);
+    }
+
+    public virtual void Apply()
+    {
+
     }
 }
