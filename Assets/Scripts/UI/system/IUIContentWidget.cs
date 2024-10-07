@@ -2,7 +2,6 @@ using CustomInspector;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
@@ -31,7 +30,8 @@ public class IUIContentWidget : IUITabWidget
     [SerializeField] protected Color contentActiveColor;
     [SerializeField] protected Color contentInactiveColor;
 
-    public virtual void Start()
+
+    public override void Start()
     {
         if (contentContainers.Count != tabs.Count)
         {
@@ -40,21 +40,6 @@ public class IUIContentWidget : IUITabWidget
         }
 
         SetCurrentContent();
-
-        //Ранее сохранялись все списки контента. Теперь сохраняется лишь 1 актуальный список, однако код оставлен в качестве "запасного"
-        //
-        //foreach (GameObject container in contentContainers)
-        //{
-        //    List<GameObject> list = container
-        //        .GetComponentsInChildren<Transform>(true)
-        //        .Where(transform => container.transform != transform)
-        //        .Select(transform => transform.gameObject)
-        //        .ToList();
-
-        //    currentContents.Add(container, list);
-
-        //    Debug.Log($"Content: {container.name}, count: {currentContents[container].Count}");
-        //}
     }
 
     public override void ActivateFocused()
@@ -82,9 +67,7 @@ public class IUIContentWidget : IUITabWidget
     {
         base.SetTabFocus(lastIndex, newIndex);
 
-        currentContent[currentContentIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
-
-        currentChangeContentIndexTime = 0;
+        currentContent[currentContentIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor; //disable active content
 
         SetCurrentContent();
         ChangeContentContainer(lastIndex, newIndex);
@@ -99,24 +82,13 @@ public class IUIContentWidget : IUITabWidget
 
     protected virtual void SetContentFocus(int lastIndex, int newIndex)
     {
-        try
-        {
-            currentContent[lastIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
-            currentContent[newIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentActiveColor;
-        }
-        catch
-        {
-            Debug.LogError($"LastIndex: {lastIndex}, NewIndex: {newIndex}");
-        }
-
-        //Аналогично описанному выше
-        //currentContents[contentContainers[newIndex]][lastIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentInactiveColor;
-        //currentContents[contentContainers[newIndex]][newIndex].GetComponentInChildren<UnityEngine.UI.Image>().color = contentActiveColor;
+        currentContent[lastIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentInactiveColor;
+        currentContent[newIndex].GetComponentInChildren<UnityEngine.UI.Image>(true).color = contentActiveColor;
 
         //Планировалась активация элемента навигаци активного списка
         //EventSystem.current.SetSelectedGameObject(currentContent[newIndex]);
 
-        //Код прокрутки ScrollRect за элементом, будет введён позже
+        //Код прокрутки ScrollRect за элементом
         RectTransform scrollView = scrollRect.viewport;
         float baseValue = scrollView.rect.height / (currentContent[0].transform as RectTransform).rect.height;
         if (!RectTransformUtility.RectangleContainsScreenPoint(scrollView, currentContent[currentContentIndex].transform.position))
@@ -124,13 +96,13 @@ public class IUIContentWidget : IUITabWidget
             float sign = (float)(lastIndex - newIndex);
             float verticalPosition = sign * (1 / (currentContent.Count - baseValue));
             scrollRect.verticalNormalizedPosition += verticalPosition;
-
-            Debug.Log($"{verticalPosition}");
         }
     }
 
     private void SetCurrentContent()
     {
+        currentChangeContentIndexTime = 0;
+
         currentContentIndex = 0;
 
         currentContent = contentContainers[currentTabIndex].GetComponentsInChildren<Transform>(true)

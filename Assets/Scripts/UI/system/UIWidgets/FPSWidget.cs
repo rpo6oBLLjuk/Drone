@@ -11,6 +11,7 @@ public class FPSWidget : IUIWidget
     [SerializeField] private float updateCount;
     [SerializeField, ProgressBar(0, nameof(updateCount), isReadOnly = true)] private float currentUpdateTime;
 
+
     public void Update()
     {
         currentUpdateTime += Time.unscaledDeltaTime;

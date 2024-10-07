@@ -22,9 +22,11 @@ public class GamepadService : MonoBehaviour
         FindDroneInputUsers();
     }
 
-    public void SetVibration() => gamepadVibrationController.SetVibration();
+    public void SetVibration() =>
+        gamepadVibrationController.SetVibration();
 
-    public void SetVibration(float strength, float time) => gamepadVibrationController.SetVibration(strength, time);
+    public void SetVibration(float strength, float time) =>
+        gamepadVibrationController.SetVibration(strength, time);
 
     private void FindDroneInputUsers()
     {

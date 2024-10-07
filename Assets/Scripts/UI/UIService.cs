@@ -1,14 +1,16 @@
 using UnityEngine;
+using Zenject;
 
 public class UIService : MonoBehaviour, IDroneInputUser
 {
-    [SerializeField] private UIWidgetsController uiWidgetsController = new();
+    [Inject] readonly DiContainer diContainer;
+    [SerializeField] public UIWidgetsController uiWidgetsController;
 
     public DroneInput DroneInput { get; set; }
 
     private void OnEnable()
     {
-        GameStateController.GameStart += Start;
+        GameStateController.GameStart += GameStart;
         GameStateController.GameEnd += GameEnd;
 
         Debug.Log("Listeners Added");
@@ -16,12 +18,15 @@ public class UIService : MonoBehaviour, IDroneInputUser
 
     private void OnDisable()
     {
-        GameStateController.GameStart -= Start;
+        GameStateController.GameStart -= GameStart;
         GameStateController.GameEnd -= GameEnd;
+
+        uiWidgetsController.Dispose();
     }
 
-    private void Start()
+    private void GameStart()
     {
+        diContainer.Inject(uiWidgetsController);
         uiWidgetsController.Start(DroneInput);
     }
 
@@ -42,6 +47,7 @@ public class UIService : MonoBehaviour, IDroneInputUser
 
     private void GameEnd(bool value)
     {
+        //Bad
         uiWidgetsController.optionsController.canBeShow = false;
         uiWidgetsController.ShowWidgetGroup((new IUIWidget[] {uiWidgetsController.gameEndWidget}, false));
 

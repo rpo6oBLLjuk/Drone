@@ -2,10 +2,13 @@ using CustomInspector;
 using DG.Tweening;
 using System;
 using UnityEngine;
+using Zenject;
 
 [Serializable]
 public abstract class IUIWidget
 {
+    [Inject] protected UIService uiService;
+
     public CanvasGroup Widget
     {
         get => _widget;
@@ -17,6 +20,15 @@ public abstract class IUIWidget
 
     [SerializeField, ReadOnly] public bool canBeShow = true;
 
+    public virtual void Start()
+    {
+
+    }
+
+    public virtual void Dispose()
+    {
+
+    }
 
     public virtual void ShowWidget()
     {
@@ -37,5 +49,12 @@ public abstract class IUIWidget
     public virtual void Apply()
     {
 
+    }
+
+    public void InjectDependencies(DiContainer container)
+    {
+        container.Inject(this);
+
+        Widget.alpha = 0; //Не лучшее решение, но виджет априори должен быть отключён при создании, и дёргать лишний метод я смысла не увмдел.
     }
 }
