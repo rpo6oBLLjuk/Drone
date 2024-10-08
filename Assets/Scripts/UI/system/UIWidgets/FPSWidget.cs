@@ -12,7 +12,7 @@ public class FPSWidget : IUIWidget
     [SerializeField, ProgressBar(0, nameof(updateCount), isReadOnly = true)] private float currentUpdateTime;
 
 
-    public void Update()
+    public override void Update()
     {
         currentUpdateTime += Time.unscaledDeltaTime;
 

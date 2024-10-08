@@ -34,5 +34,7 @@ public class GamepadService : MonoBehaviour
         {
             user.DroneInput = droneInput;
         }
+
+        Debug.Log("Drone Input added");
     }
 }

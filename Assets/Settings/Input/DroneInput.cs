@@ -197,7 +197,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Quit"",
+                    ""name"": ""Close"",
                     ""type"": ""Button"",
                     ""id"": ""58aa42d8-5908-4661-afaf-cfb05862eb83"",
                     ""expectedControlType"": ""Button"",
@@ -209,6 +209,15 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""name"": ""Apply"",
                     ""type"": ""Button"",
                     ""id"": ""4a4aec9b-0e10-441d-9194-db2cc3ea3298"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Quit"",
+                    ""type"": ""Button"",
+                    ""id"": ""e6d2fb7e-1913-43d7-a43e-88965c76d341"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -278,7 +287,7 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Quit"",
+                    ""action"": ""Close"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -290,6 +299,17 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Apply"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""17b8ce72-fece-409b-9414-f0ae1cb31c1c"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Quit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -310,8 +330,9 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         m_UI_Options = m_UI.FindAction("Options", throwIfNotFound: true);
         m_UI_SettingMenuMove = m_UI.FindAction("SettingMenuMove", throwIfNotFound: true);
         m_UI_VerticalMove = m_UI.FindAction("VerticalMove", throwIfNotFound: true);
-        m_UI_Quit = m_UI.FindAction("Quit", throwIfNotFound: true);
+        m_UI_Close = m_UI.FindAction("Close", throwIfNotFound: true);
         m_UI_Apply = m_UI.FindAction("Apply", throwIfNotFound: true);
+        m_UI_Quit = m_UI.FindAction("Quit", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -476,8 +497,9 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_Options;
     private readonly InputAction m_UI_SettingMenuMove;
     private readonly InputAction m_UI_VerticalMove;
-    private readonly InputAction m_UI_Quit;
+    private readonly InputAction m_UI_Close;
     private readonly InputAction m_UI_Apply;
+    private readonly InputAction m_UI_Quit;
     public struct UIActions
     {
         private @DroneInput m_Wrapper;
@@ -485,8 +507,9 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         public InputAction @Options => m_Wrapper.m_UI_Options;
         public InputAction @SettingMenuMove => m_Wrapper.m_UI_SettingMenuMove;
         public InputAction @VerticalMove => m_Wrapper.m_UI_VerticalMove;
-        public InputAction @Quit => m_Wrapper.m_UI_Quit;
+        public InputAction @Close => m_Wrapper.m_UI_Close;
         public InputAction @Apply => m_Wrapper.m_UI_Apply;
+        public InputAction @Quit => m_Wrapper.m_UI_Quit;
         public InputActionMap Get() { return m_Wrapper.m_UI; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -505,12 +528,15 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
             @VerticalMove.started += instance.OnVerticalMove;
             @VerticalMove.performed += instance.OnVerticalMove;
             @VerticalMove.canceled += instance.OnVerticalMove;
-            @Quit.started += instance.OnQuit;
-            @Quit.performed += instance.OnQuit;
-            @Quit.canceled += instance.OnQuit;
+            @Close.started += instance.OnClose;
+            @Close.performed += instance.OnClose;
+            @Close.canceled += instance.OnClose;
             @Apply.started += instance.OnApply;
             @Apply.performed += instance.OnApply;
             @Apply.canceled += instance.OnApply;
+            @Quit.started += instance.OnQuit;
+            @Quit.performed += instance.OnQuit;
+            @Quit.canceled += instance.OnQuit;
         }
 
         private void UnregisterCallbacks(IUIActions instance)
@@ -524,12 +550,15 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
             @VerticalMove.started -= instance.OnVerticalMove;
             @VerticalMove.performed -= instance.OnVerticalMove;
             @VerticalMove.canceled -= instance.OnVerticalMove;
-            @Quit.started -= instance.OnQuit;
-            @Quit.performed -= instance.OnQuit;
-            @Quit.canceled -= instance.OnQuit;
+            @Close.started -= instance.OnClose;
+            @Close.performed -= instance.OnClose;
+            @Close.canceled -= instance.OnClose;
             @Apply.started -= instance.OnApply;
             @Apply.performed -= instance.OnApply;
             @Apply.canceled -= instance.OnApply;
+            @Quit.started -= instance.OnQuit;
+            @Quit.performed -= instance.OnQuit;
+            @Quit.canceled -= instance.OnQuit;
         }
 
         public void RemoveCallbacks(IUIActions instance)
@@ -561,7 +590,8 @@ public partial class @DroneInput: IInputActionCollection2, IDisposable
         void OnOptions(InputAction.CallbackContext context);
         void OnSettingMenuMove(InputAction.CallbackContext context);
         void OnVerticalMove(InputAction.CallbackContext context);
-        void OnQuit(InputAction.CallbackContext context);
+        void OnClose(InputAction.CallbackContext context);
         void OnApply(InputAction.CallbackContext context);
+        void OnQuit(InputAction.CallbackContext context);
     }
 }

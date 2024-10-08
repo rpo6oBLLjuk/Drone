@@ -34,6 +34,8 @@ public class PointsSwitcher
 
     public void PointGetted()
     {
+        Debug.LogWarning($"{GameStateController.GameEnded}");
+
         Point firstPoint = points.First();
 
         firstPoint.SetPointInactive(inactiveColor);

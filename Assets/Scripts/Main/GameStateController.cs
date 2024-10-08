@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class GameStateController : MonoBehaviour
+public class GameStateController
 {
     public static event Action GameStart;
 
@@ -10,16 +10,20 @@ public class GameStateController : MonoBehaviour
     /// </summary>
     public static event Action<bool> GameEnd;
 
-    private static bool GameStarted = false;
-    private static bool GameEnded = false;
+    public static bool GameStarted { get; private set; }
+    public static bool GameEnded { get; private set; }
 
     public static void Start()
     {
-        GameEnded = false;
         if (!GameStarted)
         {
+            Debug.Log("Условие GameStarted пройдено");
+
             GameStarted = true;
             GameStart?.Invoke();
+
+            GameEnded = false;
+
         }
     }
 
@@ -27,8 +31,12 @@ public class GameStateController : MonoBehaviour
     {
         if (!GameEnded)
         {
+            Debug.Log("Условие GameEnded пройдено");
+
             GameEnded = true;
             GameEnd?.Invoke(playerWin);
+
+            GameStarted = false;
         }
     }
 }

@@ -13,4 +13,9 @@ public class Bootstrap : MonoBehaviour
     {
         GameStateController.Start();
     }
+
+    public void OnDestroy()
+    {
+        GameStateController.End(false);
+    }
 }

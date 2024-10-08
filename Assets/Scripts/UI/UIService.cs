@@ -12,11 +12,9 @@ public class UIService : MonoBehaviour, IDroneInputUser
     {
         GameStateController.GameStart += GameStart;
         GameStateController.GameEnd += GameEnd;
-
-        Debug.Log("Listeners Added");
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         GameStateController.GameStart -= GameStart;
         GameStateController.GameEnd -= GameEnd;
@@ -49,8 +47,8 @@ public class UIService : MonoBehaviour, IDroneInputUser
     {
         //Bad
         uiWidgetsController.optionsController.canBeShow = false;
-        uiWidgetsController.ShowWidgetGroup((new IUIWidget[] {uiWidgetsController.gameEndWidget}, false));
 
-        Debug.Log("Game ended");
+        uiWidgetsController.gameEndWidget.SetLevelState(value);
+        uiWidgetsController.ShowWidgetGroup((new IUIWidget[] {uiWidgetsController.gameEndWidget}, false));
     }
 }

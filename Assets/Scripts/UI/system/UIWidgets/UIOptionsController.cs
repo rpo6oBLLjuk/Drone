@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [Serializable]
 public class UIOptionsController : IUIContentWidget
@@ -8,14 +7,16 @@ public class UIOptionsController : IUIContentWidget
     public override void Start()
     {
         base.Start();
-
-        uiService.DroneInput.UI.Options.started += OptionsPressed;
-
     }
 
     public override void Dispose()
     {
         base.Dispose();
+    }
+
+    public override void Update()
+    {
+        base.Update();
 
 
     }
@@ -42,9 +43,16 @@ public class UIOptionsController : IUIContentWidget
         Time.timeScale = 1;
     }
 
-    private void OptionsPressed(InputAction.CallbackContext context)
+    public override void Options()
     {
-        if (Widget.alpha != 0)
+        if (Widget.alpha == 0)
             uiService.uiWidgetsController.ShowWidgetGroup((new IUIWidget[] { this }, true));
+    }
+
+    public override void QuitStart()
+    {
+        base.QuitStart();
+
+
     }
 }

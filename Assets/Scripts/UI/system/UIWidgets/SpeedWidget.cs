@@ -7,7 +7,6 @@ public class SpeedWidget : IUIWidget
 {
     [SerializeField] private Image image;
 
-
     public void SetCurrentSpeed(float speed, float maxSpeed)
     {
         image.fillAmount = speed / maxSpeed;

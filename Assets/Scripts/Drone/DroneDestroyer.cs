@@ -29,7 +29,10 @@ public class DroneDestroyer : MonoBehaviour, IDroneInputUser
 
         foreach (GameObject t in objectsToDestroy)
         {
+            t.GetComponent<Collider>().enabled = true;
+
             t.transform.parent = null;
+            
             Rigidbody newRb = t.AddComponent<Rigidbody>();
             newRb.velocity = rb.velocity;
             newRb.collisionDetectionMode = CollisionDetectionMode.Continuous;

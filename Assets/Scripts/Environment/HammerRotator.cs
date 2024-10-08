@@ -9,25 +9,24 @@ public class HammerRotator : MonoBehaviour
     [SerializeField] private Vector3 rotationEnd;
     [SerializeField] private float duration;
 
-    private Sequence moveSequence;
+    private Sequence moveTween;
 
     private void Start()
     {
-        rb.rotation = Quaternion.Euler(rotationStart);
+        moveTween = DOTween.Sequence();
 
-        moveSequence = DOTween.Sequence();
-
-        moveSequence.Insert(0, rb.DORotate(rotationEnd, duration / 2)
+        moveTween.Join(rb.DORotate(rotationEnd, duration)
             .SetEase(Ease.InOutSine));
 
-        moveSequence.Insert(1, rb.DORotate(rotationStart, duration / 2).
-                SetEase(Ease.InOutSine));
+        moveTween.Append(rb.DORotate(rotationStart, duration)
+            .SetEase(Ease.InOutSine));
 
-        moveSequence.SetLoops(-1);
+        moveTween.SetLoops(-1);
     }
+
 
     private void OnDisable()
     {
-        moveSequence.Kill();
+        moveTween.Kill();
     }
 }

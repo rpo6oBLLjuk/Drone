@@ -26,7 +26,6 @@ public class UIWidgetsController : IDisposable
     private List<IUIWidget> widgets = new();
 
 
-
     public void Start(DroneInput input)
     {
         droneInput = input;
@@ -41,6 +40,12 @@ public class UIWidgetsController : IDisposable
 
     public void Update()
     {
+        if (droneInput == null)
+        {
+            Debug.LogError("Drone Input не получен");
+            return;
+        }
+
         if (droneInput.UI.VerticalMove.IsPressed())
         {
             optionsController.ContentMovement(droneInput.UI.VerticalMove.ReadValue<float>());
@@ -53,6 +58,7 @@ public class UIWidgetsController : IDisposable
 
         FPSWidget.Update();
     }
+
 
     public void ShowWidgetGroup((IUIWidget[], bool) showedWidgets)
     {
@@ -80,12 +86,13 @@ public class UIWidgetsController : IDisposable
 
     private void AddListeners()
     {
-        droneInput.UI.Quit.started += HideActiveWidget;
-
-        droneInput.UI.VerticalMove.started += (InputAction.CallbackContext context) => optionsController.CalculateChangeContentIndexTime(context.ReadValue<float>(), true);
-        droneInput.UI.SettingMenuMove.started += (InputAction.CallbackContext context) => optionsController.CalculateChangeTabIndexTime(context.ReadValue<float>(), true);
-
+        droneInput.UI.Close.started += HideActiveWidget;
         droneInput.UI.Apply.started += ApllyWidget;
+
+        droneInput.UI.VerticalMove.started += MoveWidgetVertical;
+        droneInput.UI.SettingMenuMove.started += MoveWidgetSettingMenu;
+
+        droneInput.UI.Options.started += OptionsStarted;
     }
 
 
@@ -125,15 +132,44 @@ public class UIWidgetsController : IDisposable
     {
         widgetSequence.Last()
             .Item1
-            .First()
+            .Last()
             .Apply();
+    }
+
+    private void MoveWidgetVertical(InputAction.CallbackContext context)
+    {
+        if(widgetSequence.Last().Item1.Last() is IUIContentWidget contentWidget)
+        {
+            contentWidget.CalculateChangeContentIndexTime(context.ReadValue<float>(), true);
+        } 
+    }
+
+    private void MoveWidgetSettingMenu(InputAction.CallbackContext context)
+    {
+        if (widgetSequence.Last().Item1.Last() is IUITabWidget contentWidget)
+        {
+            contentWidget.CalculateChangeTabIndexTime(context.ReadValue<float>(), true);
+        }
+    }
+
+    private void OptionsStarted(InputAction.CallbackContext context)
+    {
+        optionsController.Options();
     }
 
     public void Dispose()
     {
-        droneInput.UI.Quit.started -= HideActiveWidget;
+        droneInput.UI.Close.started -= HideActiveWidget;
         droneInput.UI.Apply.started -= ApllyWidget;
 
+        droneInput.UI.VerticalMove.started -= MoveWidgetVertical;
+        droneInput.UI.SettingMenuMove.started -= MoveWidgetSettingMenu;
+
+        droneInput.UI.Options.started -= OptionsStarted;
+
         Debug.Log("Listeners Dispoced");
+
+        foreach (IUIWidget widget in widgets)
+            widget.Dispose();
     }
 }

@@ -26,6 +26,9 @@ public class CheckpointService : MonoBehaviour, IDroneInputUser
 
     public void PointGetted()
     {
+        if (GameStateController.GameEnded)
+            return;
+
         pointsSwitcher.PointGetted();
         levelTimeRecorder.PointGetted();
 

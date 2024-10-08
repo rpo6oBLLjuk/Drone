@@ -175,7 +175,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Quit",
+                    "name": "Close",
                     "type": "Button",
                     "id": "58aa42d8-5908-4661-afaf-cfb05862eb83",
                     "expectedControlType": "Button",
@@ -187,6 +187,15 @@
                     "name": "Apply",
                     "type": "Button",
                     "id": "4a4aec9b-0e10-441d-9194-db2cc3ea3298",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Quit",
+                    "type": "Button",
+                    "id": "e6d2fb7e-1913-43d7-a43e-88965c76d341",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -256,7 +265,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Quit",
+                    "action": "Close",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -268,6 +277,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Apply",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "17b8ce72-fece-409b-9414-f0ae1cb31c1c",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

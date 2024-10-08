@@ -10,9 +10,14 @@ public class CameraMover
     [SerializeField] private float offsetDistance;
     [SerializeField] private float moveSpeed;
 
+    public bool canMove = true;
+
 
     public void SetCameraPosition(Transform _camera, Transform droneTransform)
     {
+        if (!canMove)
+            return;
+
         float droneY = droneTransform.rotation.eulerAngles.y;
         float offsetX = Mathf.Sin(droneY * Mathf.Deg2Rad) * offsetDistance;
         float offsetZ = Mathf.Cos(droneY * Mathf.Deg2Rad) * offsetDistance;
