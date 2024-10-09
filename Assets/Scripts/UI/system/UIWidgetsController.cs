@@ -17,9 +17,12 @@ public class UIWidgetsController : IDisposable
     public PauseWidget pauseWidget;
     public FPSWidget FPSWidget;
     public GameEndWidget gameEndWidget;
+    public PopupWidget popupWidget;
 
-
-    private List<(IUIWidget[], bool)> widgetSequence = new();
+    /// <summary>
+    /// Последовательность открытых виджетов, bool - может ли группа виджетов быть закрыта через Close
+    /// </summary>
+    public List<(IUIWidget[], bool)> widgetSequence = new();
 
     private DroneInput droneInput;
 
@@ -83,19 +86,13 @@ public class UIWidgetsController : IDisposable
         }
     }
 
+    
+    
 
-    private void AddListeners()
-    {
-        droneInput.UI.Close.started += HideActiveWidget;
-        droneInput.UI.Apply.started += ApllyWidget;
-
-        droneInput.UI.VerticalMove.started += MoveWidgetVertical;
-        droneInput.UI.SettingMenuMove.started += MoveWidgetSettingMenu;
-
-        droneInput.UI.Options.started += OptionsStarted;
-    }
-
-
+    /// <summary>
+    /// Метод для сохранения всех возможных виджетов в список.
+    /// Основан на рефлексии, что позволяет получить в него все возможные поля данного класса, являющиеся IUIWidget без ручного заполнения
+    /// </summary>
     private void AddWidgetsToPool()
     {
         var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
@@ -111,6 +108,9 @@ public class UIWidgetsController : IDisposable
         }
     }
 
+    /// <summary>
+    /// Метод для старта виджетов, прокидывает зависимости, отключает виджеты, активирует их Start-метод
+    /// </summary>
     private void WidgetsStart()
     {
         Debug.Log($"Widgets count: {widgets.Count}");
@@ -122,8 +122,8 @@ public class UIWidgetsController : IDisposable
         }
     }
 
-
-    private void HideActiveWidget(InputAction.CallbackContext context)
+    #region Listenets
+    public void HideActiveWidget(InputAction.CallbackContext context)
     {
         HideWidgetGroup(widgetSequence.Last());
     }
@@ -154,7 +154,29 @@ public class UIWidgetsController : IDisposable
 
     private void OptionsStarted(InputAction.CallbackContext context)
     {
-        optionsController.Options();
+        optionsController.Options(); //Реализация неверна, в норме принимать данный параметр должен текущий виджет. Однако, ввиду того что текущим виджетом может быть что угодно, настройки нечему открыть. Будет исправлено по добавлении PauseMenu
+    }
+
+    private void QuitStarted(InputAction.CallbackContext context)
+    {
+        widgetSequence.Last()
+            .Item1
+            .Last()
+            .QuitStart();
+    }
+    #endregion
+
+    private void AddListeners()
+    {
+        droneInput.UI.Close.started += HideActiveWidget;
+        droneInput.UI.Apply.started += ApllyWidget;
+
+        droneInput.UI.VerticalMove.started += MoveWidgetVertical;
+        droneInput.UI.SettingMenuMove.started += MoveWidgetSettingMenu;
+
+        droneInput.UI.Options.started += OptionsStarted;
+
+        droneInput.UI.Quit.started += QuitStarted;
     }
 
     public void Dispose()
@@ -166,6 +188,8 @@ public class UIWidgetsController : IDisposable
         droneInput.UI.SettingMenuMove.started -= MoveWidgetSettingMenu;
 
         droneInput.UI.Options.started -= OptionsStarted;
+
+        droneInput.UI.Quit.started -= QuitStarted;
 
         Debug.Log("Listeners Dispoced");
 

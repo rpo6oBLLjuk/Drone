@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class IUITabWidget : IUIWidget
 {
+    [HorizontalLine("Tabs fields")]
     [SerializeField] protected List<GameObject> tabs = new();
     public int CurrentTabIndex
     {

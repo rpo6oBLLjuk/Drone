@@ -46,7 +46,7 @@ public class GameEndWidget : IUIWidget
 
     public override void Apply()
     {
-        if (mayApply)
+        if (canBeApply)
             SceneManager.LoadScene(0); //Вреенная заглушка
     }
 

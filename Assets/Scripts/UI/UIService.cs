@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Zenject;
 
@@ -41,6 +42,11 @@ public class UIService : MonoBehaviour, IDroneInputUser
     public void AddTime(float time, int checkpointNumber)
     {
         uiWidgetsController.levelTimeRecorderWidget.AddTime(time, checkpointNumber);
+    }
+
+    public void ShowPopup(string popupText, Action action, PopupType type)
+    {
+        uiWidgetsController.popupWidget.ShowWidget(popupText, action, type);
     }
 
     private void GameEnd(bool value)

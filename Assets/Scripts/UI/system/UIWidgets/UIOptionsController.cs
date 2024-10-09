@@ -49,10 +49,18 @@ public class UIOptionsController : IUIContentWidget
             uiService.uiWidgetsController.ShowWidgetGroup((new IUIWidget[] { this }, true));
     }
 
-    public override void QuitStart()
+    protected override void QuitComplete()
     {
-        base.QuitStart();
+        base.QuitComplete();
 
-
+        uiService.ShowPopup("Quit?", () =>
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
+        , PopupType.okCancel);
     }
 }

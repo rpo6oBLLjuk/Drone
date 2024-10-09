@@ -15,7 +15,6 @@ public class GameStateController
 
     public static void Start()
     {
-        if (!GameStarted)
         {
             Debug.Log("Условие GameStarted пройдено");
 

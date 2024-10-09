@@ -7,6 +7,8 @@ using UnityEngine.UIElements;
 
 public class IUIContentWidget : IUITabWidget
 {
+    [HorizontalLine("Content fields"), SerializeField] private ScrollRect scrollRect;
+
     [SerializeField] protected List<GameObject> contentContainers = new();
     [SerializeField, ReadOnly] private List<GameObject> currentContent = new();
 
@@ -21,8 +23,6 @@ public class IUIContentWidget : IUITabWidget
         }
     }
     [SerializeField, ReadOnly] protected int currentContentIndex;
-
-    [SerializeField] private ScrollRect scrollRect;
 
     [SerializeField] protected float changeContentIndexDuration = 0.5f;
     [SerializeField, ProgressBar(0, nameof(changeTabIndexDuration), isReadOnly = true)] protected float currentChangeContentIndexTime = 0.5f;

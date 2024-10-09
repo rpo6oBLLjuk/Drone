@@ -16,14 +16,15 @@ public abstract class IUIWidget : IDisposable
         get => _widget;
         set => _widget = value;
     }
-    [SerializeField] private CanvasGroup _widget;
+    [HorizontalLine("IUIWidget fields"), SerializeField] private CanvasGroup _widget;
 
-    [SerializeField, Unit("s")] protected float animDuration;
+    [SerializeField, Unit("s")] protected float animDuration = 0.25f;
 
-    [SerializeField, Unit("s")] private float quitDuration = 1;
+    [SerializeField] private bool canBeQuit = false;
+    [SerializeField, Unit("s"), ShowIf(nameof(canBeQuit))] private float quitDuration = 1;
 
     [SerializeField, ReadOnly] public bool canBeShow = true;
-    [SerializeField, ReadOnly] protected bool mayApply = false;
+    [SerializeField, ReadOnly] protected bool canBeApply = false;
 
     private CancellationTokenSource quitSource = new();
 
@@ -48,18 +49,18 @@ public abstract class IUIWidget : IDisposable
         if (canBeShow)
         {
             Widget.interactable = true;
-            
+
             Widget.DOFade(1, animDuration)
                 .SetUpdate(true)
-                .OnComplete(() => mayApply = true);
+                .OnComplete(() => canBeApply = true);
         }
     }
     public virtual void HideWidget()
     {
-        mayApply = false;
+        canBeApply = false;
 
         Widget.interactable = false;
-        
+
         Widget.DOFade(0, animDuration)
             .SetUpdate(true);
     }
@@ -76,13 +77,23 @@ public abstract class IUIWidget : IDisposable
 
     public virtual void QuitStart()
     {
-        Quiting().Forget();
+        if (canBeQuit)
+        {
+            Quiting().Forget();
+
+            Debug.Log("Выход начат");
+        }
     }
 
     public virtual void QuitPaused()
     {
         quitSource.Cancel();
         Debug.Log("Выход остановлен");
+    }
+
+    protected virtual void QuitComplete()
+    {
+        Debug.Log("Выход совершён");
     }
 
     public void InjectDependencies(DiContainer container)
@@ -94,15 +105,14 @@ public abstract class IUIWidget : IDisposable
 
     private async UniTask Quiting()
     {
-        Debug.Log("Выход начат");
-
         float quitTime = 0;
-        while(quitTime < 1)
+
+        while (quitTime < quitDuration)
         {
             await UniTask.Yield(quitSource.Token);
             quitTime += Time.unscaledDeltaTime;
         }
 
-        Debug.Log("Выход совершён");
+        QuitComplete();
     }
 }
