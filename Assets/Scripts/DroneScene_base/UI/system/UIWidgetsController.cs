@@ -1,0 +1,214 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using Zenject;
+
+[Serializable]
+public class UIWidgetsController : IDisposable
+{
+    [Inject] readonly DiContainer diContainer;
+
+    public SpeedWidget speedWidget;
+    public LevelTimeRecorderWidget levelTimeRecorderWidget;
+    public UIOptionsController optionsController;
+    public PauseWidget pauseWidget;
+    public FPSWidget FPSWidget;
+    public GameEndWidget gameEndWidget;
+    public PopupWidget popupWidget;
+
+    /// <summary>
+    /// Последовательность открытых виджетов, bool - может ли группа виджетов быть закрыта через Close
+    /// </summary>
+    public List<(IUIWidget[], bool)> widgetSequence = new();
+
+    private DroneInput droneInput;
+
+    private List<IUIWidget> widgets = new();
+
+
+    public void Start(DroneInput input)
+    {
+        droneInput = input;
+
+        AddListeners();
+
+        AddWidgetsToPool();
+        WidgetsStart();
+
+        ShowWidgetGroup((new IUIWidget[] { speedWidget, levelTimeRecorderWidget, FPSWidget }, false));
+    }
+
+    public void Update()
+    {
+        if (droneInput == null)
+        {
+            Debug.LogError("Drone Input не получен");
+            return;
+        }
+
+        if (droneInput.UI.VerticalMove.IsPressed())
+        {
+            optionsController.ContentMovement(droneInput.UI.VerticalMove.ReadValue<float>());
+        }
+
+        if (droneInput.UI.SettingMenuMove.IsPressed())
+        {
+            optionsController.TabMovement(droneInput.UI.SettingMenuMove.ReadValue<float>());
+        }
+
+        FPSWidget.Update();
+    }
+
+
+    public void ShowWidgetGroup((IUIWidget[], bool) showedWidgets)
+    {
+        widgetSequence.Add(showedWidgets);
+
+        foreach (IUIWidget widget in showedWidgets.Item1)
+        {
+            widget.ShowWidget();
+        }
+    }
+
+    public void HideWidgetGroup((IUIWidget[], bool) hidedWidgets)
+    {
+        if (hidedWidgets.Item2)
+        {
+            foreach (IUIWidget widget in hidedWidgets.Item1)
+            {
+                widget.HideWidget();
+            }
+
+            widgetSequence.Remove(hidedWidgets);
+        }
+    }
+
+    public void GameEnd(bool value)
+    {
+        gameEndWidget.SetLevelState(value);
+        ShowWidgetGroup((new IUIWidget[] { gameEndWidget}, false));
+    }
+
+    #region Start methods
+    /// <summary>
+    /// Метод для сохранения всех возможных виджетов в список.
+    /// Основан на рефлексии, что позволяет получить в него все возможные поля данного класса, являющиеся IUIWidget без ручного заполнения
+    /// </summary>
+    private void AddWidgetsToPool()
+    {
+        var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        foreach (var field in fields)
+        {
+            if (typeof(IUIWidget).IsAssignableFrom(field.FieldType))
+            {
+                if (field.GetValue(this) is IUIWidget widget)
+                {
+                    widgets.Add(widget);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Метод для старта виджетов, прокидывает зависимости, отключает виджеты, активирует их Start-метод
+    /// </summary>
+    private void WidgetsStart()
+    {
+        Debug.Log($"Widgets count: {widgets.Count}");
+        foreach (IUIWidget widget in widgets)
+        {
+            widget.InjectDependencies(diContainer);
+            widget.Start();
+            widget.Widget.alpha = 0;
+        }
+    }
+    #endregion
+
+    #region Listenets
+    public void HideActiveWidget(InputAction.CallbackContext context)
+    {
+        HideWidgetGroup(widgetSequence.Last());
+    }
+
+    private void ApllyWidget(InputAction.CallbackContext context)
+    {
+        widgetSequence.Last()
+            .Item1
+            .Last()
+            .Apply();
+    }
+
+    private void MoveWidgetVertical(InputAction.CallbackContext context)
+    {
+        if(widgetSequence.Last().Item1.Last() is IUIContentWidget contentWidget)
+        {
+            contentWidget.CalculateChangeContentIndexTime(context.ReadValue<float>(), true);
+        } 
+    }
+
+    private void MoveWidgetSettingMenu(InputAction.CallbackContext context)
+    {
+        if (widgetSequence.Last().Item1.Last() is IUITabWidget contentWidget)
+        {
+            contentWidget.CalculateChangeTabIndexTime(context.ReadValue<float>(), true);
+        }
+    }
+
+    private void OptionsStarted(InputAction.CallbackContext context)
+    {
+        optionsController.Options(); //Реализация неверна, в норме принимать данный параметр должен текущий виджет. Однако, ввиду того что текущим виджетом может быть что угодно, настройки нечему открыть. Будет исправлено по добавлении PauseMenu
+    }
+
+    private void QuitStarted(InputAction.CallbackContext context)
+    {
+        widgetSequence.Last()
+            .Item1
+            .Last()
+            .QuitStart();
+    }
+
+    private void QuitPaused(InputAction.CallbackContext context)
+    {
+        widgetSequence.Last()
+            .Item1
+            .Last()
+            .QuitPaused();
+    }
+    #endregion
+
+    private void AddListeners()
+    {
+        droneInput.UI.Close.started += HideActiveWidget;
+        droneInput.UI.Apply.started += ApllyWidget;
+
+        droneInput.UI.VerticalMove.started += MoveWidgetVertical;
+        droneInput.UI.SettingMenuMove.started += MoveWidgetSettingMenu;
+
+        droneInput.UI.Options.started += OptionsStarted;
+
+        droneInput.UI.Quit.started += QuitStarted;
+        droneInput.UI.Quit.canceled += QuitPaused;
+    }
+
+    public void Dispose()
+    {
+        droneInput.UI.Close.started -= HideActiveWidget;
+        droneInput.UI.Apply.started -= ApllyWidget;
+
+        droneInput.UI.VerticalMove.started -= MoveWidgetVertical;
+        droneInput.UI.SettingMenuMove.started -= MoveWidgetSettingMenu;
+
+        droneInput.UI.Options.started -= OptionsStarted;
+
+        droneInput.UI.Quit.started -= QuitStarted;
+        droneInput.UI.Quit.canceled -= QuitPaused;
+
+        Debug.Log("Listeners Dispoced");
+
+        foreach (IUIWidget widget in widgets)
+            widget.Dispose();
+    }
+}
