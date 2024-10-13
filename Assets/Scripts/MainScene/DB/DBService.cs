@@ -1,21 +1,27 @@
 using Cysharp.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Unity.Plastic.Newtonsoft.Json;
 using UnityEngine;
 
-public static class DBService
+public class DBService : MonoBehaviour
 {
-    private static string connectionString = "server=l64uf.h.filess.io;user=Drone_extrapaid;database=Drone_extrapaid;port=3306;password=cf3d934fa540d96fe90bead0dac7e6fd8ee14b04;SslMode=None;Pooling=false;";
+    public static DBService instance; //Синглтон, не вижу смысла использовать тут Zenject (возможно, будет использован позже)
 
-    private static MySqlConnection connection;
+    [SerializeField] public LoadingWidget loadingWidget;
+    [SerializeField] public PopupService popupService;
+    [SerializeField, TextArea(1, 5)] private string connectionString;
 
 
-    public static async UniTask<bool> VerifyLoginAsync(string login, string password)
+    private void Start()
     {
-        await UniTask.SwitchToThreadPool(); //Разграничение потока
+        instance = this;
+    }
+
+    public async UniTask<(bool, string)> VerifyLoginAsync(string login, string password)
+    {
+        RequestEnable();
+
+        await UniTask.SwitchToThreadPool();
 
         using (var connection = new MySqlConnection(connectionString))
         {
@@ -23,36 +29,40 @@ public static class DBService
 
             try
             {
-                await connection.OpenAsync();  // Асинхронное открытие соединения
+                await connection.OpenAsync();
 
-                // SQL запрос на получение пароля по логину
                 command.Connection = connection;
                 command.CommandText = "SELECT password FROM Users WHERE login = @login";
                 command.Parameters.AddWithValue("@login", login);
 
-                // Асинхронное выполнение команды
                 object result = await command.ExecuteScalarAsync();
 
                 if (result != null)
                 {
                     string storedPassword = result.ToString();
-                    return storedPassword == password;
+                    if (storedPassword == password)
+                        return (true, "Successful authorization.");
+                    else
+                        return (false, "Incorrect password.");
                 }
                 else
-                {
-                    return false;
-                }
+                    return (false, "The user with this username was not found");
             }
             catch (Exception ex)
             {
-                Debug.LogError("Ошибка при проверке логина: " + ex.Message);
-                return false;
+                return (false, $"Error: {ex.Message}");
+            }
+            finally
+            {
+                await RequestDisable();
             }
         }
     }
 
-    public static async UniTask<bool> RegisterUserAsync(string login, string password)
+    public async UniTask<(bool, string)> RegisterUserAsync(string login, string password)
     {
+        RequestEnable();
+
         await UniTask.SwitchToThreadPool(); //Разграничение потока
 
         using (var connection = new MySqlConnection(connectionString))
@@ -72,11 +82,7 @@ public static class DBService
                 int count = Convert.ToInt32(result);
 
                 if (count > 0)
-                {
-                    // Пользователь с таким логином уже существует
-                    Debug.Log("Пользователь с таким логином уже существует.");
-                    return false;
-                }
+                    return (false, "A user with this username already exists.");
 
                 // Добавляем нового пользователя
                 command.CommandText = "INSERT INTO Users (login, password) VALUES (@login, @password)";
@@ -85,47 +91,42 @@ public static class DBService
                 // Асинхронное выполнение команды на вставку данных
                 int rowsAffected = await command.ExecuteNonQueryAsync();
 
-                return rowsAffected > 0;
+                if (rowsAffected > 0)
+                    return (true, "Successful registration");
+                else
+                    return (false, "User registration error.");
             }
             catch (Exception ex)
             {
-                Debug.LogError("Ошибка при регистрации пользователя: " + ex.Message);
-                return false;
+                return (false, $"Error: {ex.Message}");
+            }
+            finally
+            {
+                await RequestDisable();
             }
         }
     }
 
-    public static async UniTask<bool> SaveLevelDataAsync(string level, int userId, TimeSpan completionTime, List<(Vector3, Quaternion)> recordedData)
+    public async UniTask<bool> SaveLevelDataAsync(string level, int userId, float completionTime)
     {
-        await UniTask.SwitchToThreadPool(); //Разграничение потока
+        RequestEnable();
 
-        // Преобразуем recordedData в JSON
-        var dataToSave = recordedData.Select(data => new
-        {
-            Position = new { data.Item1.x, data.Item1.y, data.Item1.z },
-            Rotation = new { data.Item2.x, data.Item2.y, data.Item2.z, data.Item2.w }
-        });
-
-        string json = JsonConvert.SerializeObject(dataToSave);
+        await UniTask.SwitchToThreadPool();
 
         using (var connection = new MySqlConnection(connectionString))
         {
-            MySqlCommand command = new MySqlCommand();
+            MySqlCommand command = new();
 
             try
             {
-                await connection.OpenAsync(); // Открываем соединение асинхронно
-
-                // SQL-запрос для вставки данных
+                await connection.OpenAsync();
                 command.Connection = connection;
-                command.CommandText = "INSERT INTO Level1 (user_id, completion_time, level_data) VALUES (@user_id, @completion_time, @level_data) ON DUPLICATE KEY UPDATE completion_time = @completion_time, level_data = @level_data";
+                command.CommandText = "INSERT INTO Level1 (user_id, completion_time) VALUES (@user_id, @completion_time) ON DUPLICATE KEY UPDATE completion_time = @completion_time";
+
                 command.Parameters.AddWithValue("@user_id", userId);
-                command.Parameters.AddWithValue("@completion_time", completionTime); // Преобразуйте время в нужный формат, если требуется
-                command.Parameters.AddWithValue("@level_data", json);
+                command.Parameters.AddWithValue("@completion_time", TimeSpan.FromSeconds(completionTime));
 
-                // Асинхронное выполнение команды на вставку данных
                 int rowsAffected = await command.ExecuteNonQueryAsync();
-
                 return rowsAffected > 0;
             }
             catch (Exception ex)
@@ -133,68 +134,75 @@ public static class DBService
                 Debug.LogError("Ошибка при сохранении данных уровня: " + ex.Message);
                 return false;
             }
+            finally
+            {
+                await RequestDisable();
+            }
         }
     }
 
-    public static async Task<(bool success, TimeSpan completionTime, List<(Vector3, Quaternion)> recordedData)> GetLevelDataAsync(int userId)
+    public async UniTask<(bool success, float completionTime)> LoadLevelDataAsync(int userId)
     {
-        TimeSpan completionTime = TimeSpan.Zero; // Инициализируем значение по умолчанию
-        List<(Vector3, Quaternion)> recordedData = new List<(Vector3, Quaternion)>(); // Инициализируем пустой список
+        RequestEnable();
+
+        await UniTask.SwitchToThreadPool();
+
+        float completionTime = 0;
 
         using (var connection = new MySqlConnection(connectionString))
         {
-            MySqlCommand command = new MySqlCommand();
+            MySqlCommand command = new();
 
             try
             {
-                await connection.OpenAsync(); // Открываем соединение асинхронно
+                await connection.OpenAsync();
 
-                // SQL-запрос для получения данных
                 command.Connection = connection;
-                command.CommandText = "SELECT completion_time, level_data FROM Level1 WHERE user_id = @user_id";
+                command.CommandText = "SELECT completion_time FROM Level1 WHERE user_id = @user_id";
                 command.Parameters.AddWithValue("@user_id", userId);
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     if (await reader.ReadAsync())
                     {
-                        // Получаем время прохождения уровня
                         if (reader["completion_time"] != DBNull.Value)
                         {
-                            completionTime = (TimeSpan)reader["completion_time"];
-                        }
-
-                        // Получаем JSON-данные
-                        if (reader["level_data"] != DBNull.Value)
-                        {
-                            string json = reader["level_data"].ToString();
-                            // Десериализуем JSON в список анонимных объектов
-                            var positions = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(json);
-
-                            // Преобразуем в список кортежей
-                            foreach (var pos in positions)
-                            {
-                                var position = JsonConvert.DeserializeObject<Vector3>(pos["Position"].ToString());
-                                var rotation = JsonConvert.DeserializeObject<Quaternion>(pos["Rotation"].ToString());
-                                recordedData.Add((position, rotation));
-                            }
+                            TimeSpan timeSpan = (TimeSpan)reader["completion_time"];
+                            completionTime = (float)timeSpan.TotalSeconds;
                         }
                     }
                     else
                     {
-                        // Если запись не найдена
                         Debug.LogWarning("Данные не найдены для user_id: " + userId);
-                        return (false, completionTime, recordedData); // Возвращаем false
+                        return (false, completionTime);
                     }
                 }
 
-                return (true, completionTime, recordedData); // Успешное выполнение
+                return (true, completionTime);
             }
             catch (Exception ex)
             {
                 Debug.LogError("Ошибка при получении данных уровня: " + ex.Message);
-                return (false, completionTime, recordedData); // Возвращаем false при ошибке
+                return (false, completionTime);
+            }
+            finally
+            {
+                await RequestDisable();
             }
         }
     }
+
+
+    private void RequestEnable()
+    {
+        loadingWidget.EnableWidget();
+    }
+
+    private async UniTask RequestDisable()
+    {
+        await UniTask.SwitchToMainThread();
+
+        loadingWidget.DisableWidget();
+    }
 }
+

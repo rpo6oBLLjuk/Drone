@@ -9,6 +9,8 @@ using UnityEngine.SceneManagement;
 public class GameEndWidget : IUIWidget
 {
     [HorizontalLine("Game end fields")]
+    [SerializeField, Scene] private int mainSceneIndex;
+
     [SerializeField] private float animYOffset;
     [SerializeField, Unit("s")] private float intervalBeforeTrueShowWidget = 0.5f;
     [SerializeField, Unit("s")] private float intervalBeforeFalseShowWidget = 2f;
@@ -37,8 +39,18 @@ public class GameEndWidget : IUIWidget
 
     public override void Apply()
     {
-        if (canBeApply)
-            SceneManager.LoadScene(0); //Временная заглушка
+        if (isInteractible)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        
+    }
+
+    public override void Cancel()
+    {
+        base.Cancel();
+
+        if (isInteractible)
+            SceneManager.LoadScene(mainSceneIndex);
+
     }
 
     public override void Dispose()

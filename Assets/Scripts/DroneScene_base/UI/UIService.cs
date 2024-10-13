@@ -51,9 +51,6 @@ public class UIService : MonoBehaviour, IDroneInputUser
 
     private void GameEnd(bool value)
     {
-        //Bad
-        uiWidgetsController.optionsController.canBeShow = false;
-
         uiWidgetsController.GameEnd(value);
     }
 }

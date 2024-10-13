@@ -1,9 +1,12 @@
 using System;
 using UnityEngine;
+using Zenject;
 
 [Serializable]
 public class UIOptionsController : IUIContentWidget
 {
+    [Inject] UIService uiService;
+
     public override void Start()
     {
         base.Start();
@@ -44,7 +47,7 @@ public class UIOptionsController : IUIContentWidget
     public override void Options()
     {
         if (Widget.alpha == 0)
-            uiService.uiWidgetsController.ShowWidgetGroup((new IUIWidget[] { this }, true));
+            uiService.uiWidgetsController.ShowWidget((this, true));
     }
 
     protected override void QuitComplete()

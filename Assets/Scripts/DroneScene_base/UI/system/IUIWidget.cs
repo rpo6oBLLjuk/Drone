@@ -10,8 +10,6 @@ using Zenject;
 [Serializable]
 public abstract class IUIWidget : IDisposable
 {
-    [Inject] protected UIService uiService;
-
     public CanvasGroup Widget
     {
         get => _widget;
@@ -26,12 +24,12 @@ public abstract class IUIWidget : IDisposable
     [SerializeField, ShowIf(nameof(canBeQuit))] private Image quitFiller;
 
     [SerializeField, ReadOnly] public bool canBeShow = true;
-    [SerializeField, ReadOnly] protected bool canBeApply = false;
-
-    private Sequence widgetVisibilitySequence;
+    [SerializeField] protected bool isInteractible = true; //Может быть использовано для проверки активности виджета
 
     private CancellationTokenSource quitSource = new();
 
+    public event Action showCompleted;
+    public event Action hideCompleted;
 
 
     public virtual void Start()
@@ -49,48 +47,45 @@ public abstract class IUIWidget : IDisposable
 
     }
 
+    public void InjectDependencies(DiContainer container)
+    {
+        container.Inject(this);
+    }
+
     public virtual void ShowWidget()
     {
         if (canBeShow)
         {
             Widget.interactable = true;
 
+            Widget.DOFade(1, animDuration)
+                .SetUpdate(true)
+                .OnComplete(() => showCompleted?.Invoke());
 
-            widgetVisibilitySequence = DOTween.Sequence();
-
-            widgetVisibilitySequence.Join(Widget.DOFade(1, animDuration))
-                .SetUpdate(true);
-
-            canBeApply = true;
+            showCompleted?.Invoke();
         }
     }
     public virtual void HideWidget()
     {
-        canBeApply = false;
-
         Widget.interactable = false;
 
         Widget.DOFade(0, animDuration)
-            .SetUpdate(true);
+            .SetUpdate(true)
+            .OnComplete(() => hideCompleted?.Invoke());
     }
 
     public virtual void Apply()
     {
 
     }
+    public virtual void Cancel()
+    {
 
+    }
     public virtual void Options()
     {
 
     }
-
-    public void InjectDependencies(DiContainer container)
-    {
-        container.Inject(this);
-
-        Widget.alpha = 0; //Не лучшее решение, но виджет априори должен быть отключён при создании, и дёргать лишний метод я смысла не увмдел.
-    }
-
     public virtual void QuitStart()
     {
         if (canBeQuit)
@@ -106,12 +101,10 @@ public abstract class IUIWidget : IDisposable
         quitSource.Cancel();
         Debug.Log("Выход остановлен");
     }
-
     protected virtual void QuitComplete()
     {
         Debug.Log("Выход совершён");
     }
-
     private async UniTask Quiting()
     {
         try

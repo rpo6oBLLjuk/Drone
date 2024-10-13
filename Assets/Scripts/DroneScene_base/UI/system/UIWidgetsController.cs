@@ -12,17 +12,17 @@ public class UIWidgetsController : IDisposable
     [Inject] readonly DiContainer diContainer;
 
     public SpeedWidget speedWidget;
+    public FPSWidget FPSWidget;
     public LevelTimeRecorderWidget levelTimeRecorderWidget;
     public UIOptionsController optionsController;
     public PauseWidget pauseWidget;
-    public FPSWidget FPSWidget;
-    public GameEndWidget gameEndWidget;
     public PopupWidget popupWidget;
+    public GameEndWidget gameEndWidget;
 
     /// <summary>
     /// Последовательность открытых виджетов, bool - может ли группа виджетов быть закрыта через Close
     /// </summary>
-    public List<(IUIWidget[], bool)> widgetSequence = new();
+    public List<(IUIWidget, bool)> widgetSequence = new();
 
     private DroneInput droneInput;
 
@@ -38,7 +38,9 @@ public class UIWidgetsController : IDisposable
         AddWidgetsToPool();
         WidgetsStart();
 
-        ShowWidgetGroup((new IUIWidget[] { speedWidget, levelTimeRecorderWidget, FPSWidget }, false));
+        ShowWidget((speedWidget, false));
+        ShowWidget((levelTimeRecorderWidget, false));
+        ShowWidget((FPSWidget, false));
     }
 
     public void Update()
@@ -63,33 +65,32 @@ public class UIWidgetsController : IDisposable
     }
 
 
-    public void ShowWidgetGroup((IUIWidget[], bool) showedWidgets)
+    public void ShowWidget((IUIWidget, bool) showedWidget)
     {
-        widgetSequence.Add(showedWidgets);
-
-        foreach (IUIWidget widget in showedWidgets.Item1)
+        if (showedWidget.Item1.canBeShow)
         {
-            widget.ShowWidget();
+            showedWidget.Item1.ShowWidget();
+
+            widgetSequence.Add(showedWidget);
         }
     }
 
-    public void HideWidgetGroup((IUIWidget[], bool) hidedWidgets)
+    public void HideWidget((IUIWidget, bool) hidedWidget)
     {
-        if (hidedWidgets.Item2)
+        if (hidedWidget.Item2)
         {
-            foreach (IUIWidget widget in hidedWidgets.Item1)
-            {
-                widget.HideWidget();
-            }
+            hidedWidget.Item1.HideWidget();
 
-            widgetSequence.Remove(hidedWidgets);
+            widgetSequence.Remove(hidedWidget);
         }
     }
 
     public void GameEnd(bool value)
     {
+        optionsController.canBeShow = false;
+
         gameEndWidget.SetLevelState(value);
-        ShowWidgetGroup((new IUIWidget[] { gameEndWidget}, false));
+        ShowWidget((gameEndWidget, false));
     }
 
     #region Start methods
@@ -128,30 +129,33 @@ public class UIWidgetsController : IDisposable
     #endregion
 
     #region Listenets
-    public void HideActiveWidget(InputAction.CallbackContext context)
-    {
-        HideWidgetGroup(widgetSequence.Last());
-    }
-
-    private void ApllyWidget(InputAction.CallbackContext context)
+    private void Aplly(InputAction.CallbackContext context)
     {
         widgetSequence.Last()
             .Item1
-            .Last()
             .Apply();
+    }
+
+    public void Close(InputAction.CallbackContext context)
+    {
+        (IUIWidget, bool) widget = widgetSequence.Last();
+        if (widget.Item2)
+            HideWidget(widget);
+        else
+            widget.Item1.Cancel();
     }
 
     private void MoveWidgetVertical(InputAction.CallbackContext context)
     {
-        if(widgetSequence.Last().Item1.Last() is IUIContentWidget contentWidget)
+        if (widgetSequence.Last().Item1 is IUIContentWidget contentWidget)
         {
             contentWidget.CalculateChangeContentIndexTime(context.ReadValue<float>(), true);
-        } 
+        }
     }
 
     private void MoveWidgetSettingMenu(InputAction.CallbackContext context)
     {
-        if (widgetSequence.Last().Item1.Last() is IUITabWidget contentWidget)
+        if (widgetSequence.Last().Item1 is IUITabWidget contentWidget)
         {
             contentWidget.CalculateChangeTabIndexTime(context.ReadValue<float>(), true);
         }
@@ -166,7 +170,6 @@ public class UIWidgetsController : IDisposable
     {
         widgetSequence.Last()
             .Item1
-            .Last()
             .QuitStart();
     }
 
@@ -174,15 +177,14 @@ public class UIWidgetsController : IDisposable
     {
         widgetSequence.Last()
             .Item1
-            .Last()
             .QuitPaused();
     }
     #endregion
 
     private void AddListeners()
     {
-        droneInput.UI.Close.started += HideActiveWidget;
-        droneInput.UI.Apply.started += ApllyWidget;
+        droneInput.UI.Close.started += Close;
+        droneInput.UI.Apply.started += Aplly;
 
         droneInput.UI.VerticalMove.started += MoveWidgetVertical;
         droneInput.UI.SettingMenuMove.started += MoveWidgetSettingMenu;
@@ -195,8 +197,8 @@ public class UIWidgetsController : IDisposable
 
     public void Dispose()
     {
-        droneInput.UI.Close.started -= HideActiveWidget;
-        droneInput.UI.Apply.started -= ApllyWidget;
+        droneInput.UI.Close.started -= Close;
+        droneInput.UI.Apply.started -= Aplly;
 
         droneInput.UI.VerticalMove.started -= MoveWidgetVertical;
         droneInput.UI.SettingMenuMove.started -= MoveWidgetSettingMenu;

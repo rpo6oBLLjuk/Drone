@@ -3,15 +3,34 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Zenject;
 
 [Serializable]
 public class PopupWidget : IUIWidget
 {
+    [Inject] UIService uiService;
+
     [HorizontalLine("Popup fields")]
     [SerializeField] private ReorderableDictionary<PopupType, GameObject> popups;
 
     private Action currentAction;
     private PopupType currentPopupType;
+
+    private GameObject currentPopup;
+
+    public override void Start()
+    {
+        base.Start();
+
+        hideCompleted += HideCompleted;
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+
+        hideCompleted -= HideCompleted;
+    }
 
     public void ShowWidget(string popupText, Action action, PopupType type)
     {
@@ -20,18 +39,18 @@ public class PopupWidget : IUIWidget
         currentPopupType = type;
         currentAction = action;
 
-        GameObject popup = popups[type];
-        popup.SetActive(true);
+        currentPopup = UnityEngine.Object.Instantiate(popups[type], Widget.transform);
+        currentPopup.SetActive(true);
 
-        foreach (TextMeshProUGUI tmpro in popup.GetComponentsInChildren<TextMeshProUGUI>())
+        foreach (TextMeshProUGUI tmpro in currentPopup.GetComponentsInChildren<TextMeshProUGUI>())
         {
-            if (tmpro.gameObject.name.Contains("opup"))
+            if (tmpro.gameObject.name.ToLower().Contains("popup"))
             {
                 tmpro.text = popupText;
             }
         }
 
-        uiService.uiWidgetsController.widgetSequence.Add((new IUIWidget[] { this }, type is PopupType.okCancel));
+        uiService.uiWidgetsController.widgetSequence.Add((this, type is PopupType.okCancel));
     }
 
     public override void Apply()
@@ -40,7 +59,7 @@ public class PopupWidget : IUIWidget
 
         InputAction.CallbackContext context = new();
 
-        uiService.uiWidgetsController.HideActiveWidget(context);
+        uiService.uiWidgetsController.Close(context);
     }
 
     public override void HideWidget()
@@ -48,13 +67,12 @@ public class PopupWidget : IUIWidget
         base.HideWidget();
 
         currentAction = null;
+    }
 
-        popups[currentPopupType].SetActive(false);
+    private void HideCompleted()
+    {
+        UnityEngine.Object.Destroy(currentPopup);
     }
 }
 
-public enum PopupType
-{
-    ok,
-    okCancel
-}
+
