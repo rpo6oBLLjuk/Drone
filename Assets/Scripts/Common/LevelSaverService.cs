@@ -15,7 +15,6 @@ public static class LevelSaverService
     // Метод для сохранения времени уровня
     public static void SaveLevelTime(string levelName, float time)
     {
-        // Создаём директорию, если она не существует
         if (!Directory.Exists(basePath))
         {
             Directory.CreateDirectory(basePath);
