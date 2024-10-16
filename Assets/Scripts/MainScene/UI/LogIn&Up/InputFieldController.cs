@@ -60,6 +60,6 @@ public class InputFieldController : MonoBehaviour
     private bool IsEnglishLetterOrDigit(char c)
     {
         // Проверка, является ли символ буквой (A-Z, a-z) или цифрой (0-9)
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == ' ' || c == '_';
     }
 }

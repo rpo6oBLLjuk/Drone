@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class AuthenticationController : MonoBehaviour
@@ -28,10 +29,11 @@ public class AuthenticationController : MonoBehaviour
 
         loginning = true;
 
-        (bool, string) verifyData = await DBService.instance.VerifyLoginAsync(loginInputField.GetText(), passwordInputField.GetText());
-
-        DBService.instance.popupService.ShowPopup(verifyData.Item2, PopupType.ok, verifyData.Item1);
+        (bool success, string error) = await DBService.instance.VerifyLoginAsync(loginInputField.GetText(), passwordInputField.GetText());
 
         loginning = false;
+
+        await UniTask.SwitchToMainThread();
+        DBService.instance.popupService.ShowPopup(error, PopupType.ok, success);
     }
 }

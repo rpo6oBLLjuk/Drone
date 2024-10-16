@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class RegistrationController : MonoBehaviour
@@ -40,11 +41,11 @@ public class RegistrationController : MonoBehaviour
 
         loginning = true;
 
-        (bool, string) verifyData = await DBService.instance.RegisterUserAsync(loginInputField.GetText(), passwordInputField1.GetText());
-
-        DBService.instance.popupService.ShowPopup(verifyData.Item2, PopupType.ok, verifyData.Item1);
+        (bool success, string error) = await DBService.instance.RegisterUserAsync(loginInputField.GetText(), passwordInputField1.GetText());
 
         loginning = false;
-    }
 
+        await UniTask.SwitchToMainThread();
+        DBService.instance.popupService.ShowPopup(error, PopupType.ok, success);
+    }
 }
