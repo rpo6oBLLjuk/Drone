@@ -1,6 +1,6 @@
 using CustomInspector;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,16 +9,78 @@ public class CopyTreeFromTerrain : MonoBehaviour
     [SerializeField] private Terrain terrain;
     [SerializeField] private Transform treeContainer;
 
+    [SerializeField] private string basePath = "Assets/Prefabs/CombinedMesh";
     [SerializeField, Button(nameof(CreateTreeFromTerrain))] private bool hideTerrain;
-    [SerializeField, Button(nameof(CombineMesh))] private bool hideTrees;
-
-    [SerializeField] private List<GameObject> instantiatedTrees = new();
+    [SerializeField] private bool hideTrees;
 
 
-    private void Start()
+    [SerializeField] private Dictionary<Transform, List<GameObject>> instantiatedTrees = new();
+
+
+    private void CreateTreeFromTerrain()
     {
+        // Удаляем все ранее инстанцированные деревья и контейнеры
+        foreach (var container in instantiatedTrees.Keys)
+        {
+            if (container != null)
+                DestroyImmediate(container.gameObject);
+        }
+        instantiatedTrees.Clear();
 
+        TerrainData terrainData = terrain.terrainData;
+
+        // Получаем все деревья на Terrain
+        TreeInstance[] allTrees = terrainData.treeInstances;
+        TreePrototype[] treePrototypes = terrainData.treePrototypes;
+
+        // Локальный словарь для хранения контейнеров
+        Dictionary<Vector2Int, Transform> gridContainers = new();
+
+        // Проходим по каждому дереву и создаем экземпляр
+        foreach (TreeInstance tree in allTrees)
+        {
+            // Находим префаб для текущего дерева
+            int prototypeIndex = tree.prototypeIndex;
+            GameObject treePrefab = treePrototypes[prototypeIndex].prefab;
+
+            // Вычисляем мировую позицию дерева
+            Vector3 worldPosition = Vector3.Scale(tree.position, terrainData.size) + terrain.transform.position;
+
+            // Вычисляем, в какой квадрат 10x10 попадает дерево
+            Vector2Int gridPos = new Vector2Int(
+                Mathf.FloorToInt(worldPosition.x / 10),
+                Mathf.FloorToInt(worldPosition.z / 10)
+            );
+
+            // Проверяем, существует ли уже контейнер для этой сетки
+            if (!gridContainers.ContainsKey(gridPos))
+            {
+                // Если нет, создаем новый объект-контейнер
+                GameObject container = new GameObject($"TreeGroup_{gridPos.x}_{gridPos.y}");
+                container.transform.SetParent(treeContainer);
+                container.transform.position = new Vector3(gridPos.x * 10, 0, gridPos.y * 10); // Позиция контейнера
+
+                // Добавляем контейнер в локальный словарь
+                gridContainers[gridPos] = container.transform;
+                instantiatedTrees[container.transform] = new List<GameObject>(); // Создаем новый список для этого контейнера
+            }
+
+            // Создаем экземпляр дерева в соответствующем контейнере
+            GameObject treeInstance = Instantiate(treePrefab, worldPosition, Quaternion.identity, gridContainers[gridPos]);
+
+            // Добавляем дерево в список
+            instantiatedTrees[gridContainers[gridPos]].Add(treeInstance);
+        }
+
+        Debug.Log($"Количество контейнеров: {instantiatedTrees.Count}");
+
+        if (hideTerrain)
+            terrain.gameObject.SetActive(false);
+
+        CombineMesh();
     }
+
+
 
     [ExecuteInEditMode]
     private void CombineMesh()
@@ -26,36 +88,35 @@ public class CopyTreeFromTerrain : MonoBehaviour
         if (instantiatedTrees.Count == 0)
             return;
 
-        MeshFilter firstMeshFilter = instantiatedTrees[0].GetComponentInChildren<MeshFilter>(true);
-        Mesh firstMesh = firstMeshFilter.sharedMesh;
-
         List<List<CombineInstance>> combineInstancesBySubMesh = new();
-        for (int i = 0; i < firstMesh.subMeshCount; i++)
-        {
-            combineInstancesBySubMesh.Add(new List<CombineInstance>());
-        }
 
-        foreach (GameObject tree in instantiatedTrees)
+        foreach (List<GameObject> currentInstance in instantiatedTrees.Values)
         {
-            MeshFilter meshFilter = tree.GetComponentInChildren<MeshFilter>(true);
-            if (meshFilter != null)
+            foreach (GameObject tree in currentInstance)
             {
-                Mesh mesh = meshFilter.sharedMesh;
+                combineInstancesBySubMesh.Add(new List<CombineInstance>());
 
-                for (int i = 0; i < mesh.subMeshCount; i++)
+                MeshFilter meshFilter = tree.GetComponentInChildren<MeshFilter>(true);
+                if (meshFilter != null)
                 {
-                    CombineInstance combine = new CombineInstance
-                    {
-                        mesh = mesh,
-                        transform = meshFilter.transform.localToWorldMatrix,
-                        subMeshIndex = i
-                    };
+                    Mesh mesh = meshFilter.sharedMesh;
 
-                    // Добавляем в соответствующий список по индексу submesh
-                    combineInstancesBySubMesh[i].Add(combine);
+                    for (int i = 0; i < mesh.subMeshCount; i++)
+                    {
+                        CombineInstance combine = new CombineInstance
+                        {
+                            mesh = mesh,
+                            transform = meshFilter.transform.localToWorldMatrix,
+                            subMeshIndex = i
+                        };
+
+                        // Добавляем в соответствующий список по индексу submesh
+                        combineInstancesBySubMesh.Last().Add(combine);
+                    }
                 }
             }
         }
+
 
         // Создаем объект для каждого submesh
         for (int i = 0; i < combineInstancesBySubMesh.Count; i++)
@@ -76,21 +137,23 @@ public class CopyTreeFromTerrain : MonoBehaviour
             combinedMeshFilter.mesh = combinedMesh;
 
             // Устанавливаем материал для комбинированного меша
-            Material[] materials = firstMeshFilter.GetComponentInChildren<MeshRenderer>().materials;
+            Material[] materials = instantiatedTrees.ElementAt(i).Value.First().GetComponentInChildren<MeshRenderer>().materials;
             combinedMeshRenderer.material = materials[i < materials.Length ? i : 0];
 
-            if (hideTrees)
-                treeContainer.gameObject.SetActive(false);
-
+            SaveMeshAsset(combinedMesh, $"CombinedMesh_SubMesh_{i}.asset");
             Debug.Log($"Меш {combinedMeshObject.name} успешно создан.");
         }
+
+        if (hideTrees)
+            treeContainer.gameObject.SetActive(false);
 
         Debug.Log("Все меши деревьев успешно объединены.");
     }
 
-
-    private void SaveMeshAsset(Mesh mesh, string path)
+    private void SaveMeshAsset(Mesh mesh, string fileName)
     {
+        string path = basePath + fileName;
+
         if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
         {
             AssetDatabase.DeleteAsset(path);
@@ -100,48 +163,5 @@ public class CopyTreeFromTerrain : MonoBehaviour
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log($"Меш сохранен по пути: {path}");
-    }
-
-    private void CreateTreeFromTerrain()
-    {
-        foreach (GameObject tree in instantiatedTrees)
-        {
-            if (tree != null)
-                DestroyImmediate(tree);
-        }
-        instantiatedTrees.Clear();
-
-        TerrainData data = terrain.terrainData;
-
-        // Получаем данные Terrain
-        TerrainData terrainData = terrain.terrainData;
-
-        // Получаем все деревья, созданные на Terrain
-        TreeInstance[] allTrees = terrainData.treeInstances;
-
-        // Получаем все префабы деревьев
-        TreePrototype[] treePrototypes = terrainData.treePrototypes;
-
-        // Проходим по каждому дереву и создаем экземпляр
-        foreach (TreeInstance tree in allTrees)
-        {
-            // Находим префаб для текущего дерева
-            int prototypeIndex = tree.prototypeIndex;
-            GameObject treePrefab = treePrototypes[prototypeIndex].prefab;
-
-            // Вычисляем мировую позицию дерева
-            Vector3 worldPosition = Vector3.Scale(tree.position, terrainData.size) + terrain.transform.position;
-
-            // Создаем экземпляр дерева
-            GameObject treeInstance = Instantiate(treePrefab, worldPosition, Quaternion.identity, treeContainer);
-
-            // Добавляем дерево в список
-            instantiatedTrees.Add(treeInstance);
-        }
-
-        Debug.Log($"Количество инстанцированных деревьев: {instantiatedTrees.Count}");
-
-        if (hideTerrain)
-            terrain.gameObject.SetActive(false);
     }
 }
