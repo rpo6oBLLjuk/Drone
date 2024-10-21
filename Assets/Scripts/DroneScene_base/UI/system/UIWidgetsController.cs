@@ -118,7 +118,6 @@ public class UIWidgetsController : IDisposable
     /// </summary>
     private void WidgetsStart()
     {
-        Debug.Log($"Widgets count: {widgets.Count}");
         foreach (IUIWidget widget in widgets)
         {
             widget.InjectDependencies(diContainer);

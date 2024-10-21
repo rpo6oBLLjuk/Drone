@@ -1,4 +1,6 @@
 using Cysharp.Threading.Tasks;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class AuthenticationController : MonoBehaviour
@@ -6,11 +8,11 @@ public class AuthenticationController : MonoBehaviour
     [SerializeField] private InputFieldController loginInputField;
     [SerializeField] private InputFieldController passwordInputField;
 
-    private bool loginning = false;
+    private TaskCompletionSource<bool> authTask;
 
     public async void LogIn()
     {
-        if (loginning)
+        if (authTask != null && !authTask.Task.IsCompleted)
         {
             Debug.Log("Уже в процессе аутентификации");
             return;
@@ -27,13 +29,15 @@ public class AuthenticationController : MonoBehaviour
             return;
         }
 
-        loginning = true;
+        authTask = new();
 
         (bool success, string error) = await DBService.instance.VerifyLoginAsync(loginInputField.GetText(), passwordInputField.GetText());
 
-        loginning = false;
+        if (!success)
+            await UniTask.SwitchToMainThread();
 
-        await UniTask.SwitchToMainThread();
         DBService.instance.popupService.ShowPopup(error, PopupType.ok, success);
+
+        authTask.SetResult(success);
     }
 }

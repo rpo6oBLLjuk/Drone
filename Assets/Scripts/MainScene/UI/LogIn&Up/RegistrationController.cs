@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class RegistrationController : MonoBehaviour
@@ -7,11 +8,11 @@ public class RegistrationController : MonoBehaviour
     [SerializeField] private InputFieldController passwordInputField1;
     [SerializeField] private InputFieldController passwordInputField2;
 
-    private bool loginning = false;
+    private TaskCompletionSource<bool> regTask;
 
     public async void SingUp()
     {
-        if (loginning)
+        if (regTask != null && !regTask.Task.IsCompleted)
         {
             Debug.Log("Уже в процессе регистрации");
             return;
@@ -39,13 +40,15 @@ public class RegistrationController : MonoBehaviour
             return;
         }
 
-        loginning = true;
+        regTask = new();
 
         (bool success, string error) = await DBService.instance.RegisterUserAsync(loginInputField.GetText(), passwordInputField1.GetText());
 
-        loginning = false;
+        if (!success)
+            await UniTask.SwitchToMainThread();
 
-        await UniTask.SwitchToMainThread();
         DBService.instance.popupService.ShowPopup(error, PopupType.ok, success);
+
+        regTask.SetResult(success);
     }
 }

@@ -7,6 +7,7 @@ using UnityEngine;
 [Serializable]
 public class PointsSwitcher
 {
+    [SerializeField] private Transform pointsContainer;
     [SerializeField] private List<Point> points = new();
 
     [HorizontalLine("Colors")]
@@ -21,10 +22,25 @@ public class PointsSwitcher
 
     public void Start(CheckpointService service)
     {
+        points = points.Where(point => point != null).ToList();
+
+        if (points.Count == 0)
+        {
+            points = pointsContainer.GetComponentsInChildren<Point>().ToList();
+
+            if (points.Count == 0)
+            {
+                Debug.LogWarning("Checkpoint Service не обнаружил чекпоинтов");
+                return;
+            }
+        }
+
         checkpointService = service;
 
         foreach (var point in points)
         {
+            if (point == null)
+                continue;
             point.pointService = service;
             point.SetPointInactive(inactiveColor);
         }

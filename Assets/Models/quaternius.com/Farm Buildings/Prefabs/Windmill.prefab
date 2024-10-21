@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 7867432644643457602}
   - component: {fileID: 7819689015124122587}
   - component: {fileID: 7991991174962447010}
+  - component: {fileID: 1521678930636892215}
   m_Layer: 0
   m_Name: Windmill_Blades
   m_TagString: Untagged
@@ -140,6 +141,21 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -6144885613272201092, guid: 8ed1b93d9ccc83c4dac5fb90c32423e2, type: 3}
+--- !u!114 &1521678930636892215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1453277652142559126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30dfb7cc2d789cc49bddf2fc0d6e9948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _transform: {fileID: 0}
+  rotationAxis: {x: 0, y: 1, z: 0}
+  rotationTime: 10
 --- !u!1 &5938417247162080349
 GameObject:
   m_ObjectHideFlags: 0

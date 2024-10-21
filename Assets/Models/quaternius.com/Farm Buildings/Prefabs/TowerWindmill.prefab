@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8389054708207223251}
   - component: {fileID: 7370394457950319400}
   - component: {fileID: 4837891736357529151}
+  - component: {fileID: 602463067283650388}
   m_Layer: 0
   m_Name: TowerWindmill_Blades
   m_TagString: Untagged
@@ -106,6 +107,21 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -8806130311746038888, guid: 7a053bdb85be86340b86a39818c66a79, type: 3}
+--- !u!114 &602463067283650388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6524086089835388599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30dfb7cc2d789cc49bddf2fc0d6e9948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _transform: {fileID: 294929679021194593}
+  rotationAxis: {x: 0, y: 1, z: 0}
+  rotationTime: 10
 --- !u!1 &6914317901576750961
 GameObject:
   m_ObjectHideFlags: 0

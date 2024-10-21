@@ -23,6 +23,11 @@ public class PopupService : MonoBehaviour
             {
                 widget.blocksRaycasts = true;
                 widget.interactable = true;
+            })
+            .OnComplete(()=>
+            {
+                if(isPositive)
+                    StateController.AuthComplete?.Invoke();
             });
 
         SetText(text, popup);
