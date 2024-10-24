@@ -11,7 +11,7 @@ public class LoadingWidget : MonoBehaviour
 
     private Tween tween;
 
-    private void Start()
+    private void Awake()
     {
         DisableWidget();
     }
@@ -29,7 +29,9 @@ public class LoadingWidget : MonoBehaviour
 
     public void DisableWidget()
     {
-        loadingImage.enabled = false;
+        if (loadingImage != null)
+            loadingImage.enabled = false;
         tween.Kill();
     }
+
 }

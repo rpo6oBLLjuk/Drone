@@ -1,3 +1,4 @@
+using CustomInspector;
 using System;
 using TMPro;
 using UnityEngine;
@@ -9,7 +10,6 @@ public class LevelTimeRecorderWidget : IUIWidget
     [SerializeField] private Transform parentContainer;
     [SerializeField] private string checkpointNameText = "Checkpoint: ";
     [SerializeField] private string checkpointTimeText = "Time: ";
-
 
     public void AddTime(float time, int checkpointNumber)
     {

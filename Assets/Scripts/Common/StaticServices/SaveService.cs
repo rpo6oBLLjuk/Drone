@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -9,15 +10,13 @@ public static class SaveService
 
 
     [Serializable]
-    public class LevelData
+    public class LevelsData
     {
-        public string levelName;
-        public float time;
+        public List<float> times;
 
-        public LevelData(string levelName, float time)
+        public LevelsData(List<float> times)
         {
-            this.levelName = levelName;
-            this.time = time;
+            this.times = times;
         }
     }
 
@@ -26,16 +25,18 @@ public static class SaveService
     {
         public int user_id;
         public string login;
+        public string password;
 
-        public UserData(int user_id, string login)
+        public UserData(int user_id, string login, string password)
         {
             this.user_id = user_id;
             this.login = login;
+            this.password = password;
         }
     }
 
 
-    public static void SaveLocalUser(int user_id, string login)
+    public static void SaveLocalUser(int user_id, string login, string password)
     {
         try
         {
@@ -44,7 +45,7 @@ public static class SaveService
                 Directory.CreateDirectory(baseUserPath);
             }
 
-            UserData userData = new(user_id, login);
+            UserData userData = new(user_id, login, password);
 
             string filePath = Path.Combine(baseUserPath, $"userdata.json");
             string json = JsonUtility.ToJson(userData);
@@ -73,34 +74,71 @@ public static class SaveService
     }
 
 
-    public static void SaveLevelTime(string levelName, float time)
+    public static void SaveLevelTime(int level, float time)
     {
+        string levelName = $"Level{level}";
+
         if (!Directory.Exists(baseLevelPath))
         {
             Directory.CreateDirectory(baseLevelPath);
         }
 
-        LevelData levelData = new(levelName, time);
+        LevelsData levelData = new(LoadAllLevelTime());
+        levelData.times[level - 1] = time;
 
         string json = JsonUtility.ToJson(levelData);
 
-        string filePath = Path.Combine(baseLevelPath, $"{levelName}.json");
+        string filePath = Path.Combine(baseLevelPath, $"LevelsData.json");
 
         File.WriteAllText(filePath, json);
+
+        Debug.Log($"Level {level} was save with time: {time}");
     }
 
-    public static float LoadLevelTime(string levelName)
+    public static float LoadLevelTime(int level)
     {
-        string filePath = Path.Combine(baseLevelPath, $"{levelName}.json");
+        string filePath = Path.Combine(baseLevelPath, $"LevelsData.json");
 
         if (File.Exists(filePath))
         {
             string json = File.ReadAllText(filePath);
-            LevelData levelData = JsonUtility.FromJson<LevelData>(json);
+            LevelsData levelData = JsonUtility.FromJson<LevelsData>(json);
 
-            return levelData.time;
+            return levelData.times[level - 1];
         }
 
         return 0f;
+    }
+
+    public static void SaveAllLevelTime(List<float> times)
+    {
+        string filePath = Path.Combine(baseLevelPath, $"LevelsData.json");
+
+        if (!Directory.Exists(baseLevelPath))
+        {
+            Directory.CreateDirectory(baseLevelPath);
+        }
+
+        LevelsData levelData = new(times);
+
+        string json = JsonUtility.ToJson(levelData);
+
+        File.WriteAllText(filePath, json);
+    }
+
+    public static List<float> LoadAllLevelTime()
+    {
+        List<float> returnedValue = new();
+        string filePath = Path.Combine(baseLevelPath, $"LevelsData.json");
+
+        if (File.Exists(filePath))
+        {
+            string json = File.ReadAllText(filePath);
+            LevelsData levelData = JsonUtility.FromJson<LevelsData>(json);
+
+            return levelData.times;
+        }
+
+        return returnedValue;
     }
 }

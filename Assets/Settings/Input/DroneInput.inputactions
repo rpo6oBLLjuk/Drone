@@ -112,6 +112,17 @@
                     "action": "Throttle",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2ed32bec-82ed-424e-b808-c95482bdfef7",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throttle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -216,6 +227,17 @@
                 },
                 {
                     "name": "",
+                    "id": "899f94cd-7733-4db2-bc37-0857f59197d7",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Options",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "40a87539-8bc7-46a7-bdad-646d49ccf240",
                     "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
@@ -271,6 +293,17 @@
                 },
                 {
                     "name": "",
+                    "id": "8cb91665-4fab-4152-a578-fdb153bff59c",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Close",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "cbbbb74e-d520-4703-a98f-d97d450d1e40",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
@@ -282,8 +315,30 @@
                 },
                 {
                     "name": "",
+                    "id": "d2a399e6-3798-474e-b707-0df257db6e19",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Apply",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "17b8ce72-fece-409b-9414-f0ae1cb31c1c",
                     "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ea3c227e-214e-4844-95b0-f90664b82459",
+                    "path": "<Keyboard>/x",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

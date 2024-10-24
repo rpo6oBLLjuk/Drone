@@ -1,17 +1,14 @@
 using Cysharp.Threading.Tasks;
-using MySql.Data.MySqlClient;
-using System;
 using UnityEngine;
 
 public class DBService : MonoBehaviour
 {
     public static DBService instance; //Синглтон, не вижу смысла использовать тут Zenject (возможно, будет использован позже)
 
-    [SerializeField] public LoadingWidget loadingWidget;
-    [SerializeField] public PopupService popupService;
+    [SerializeField] private LoadingWidget loadingWidget;
 
 
-    private void Start()
+    private void Awake()
     {
         instance = this;
     }
@@ -21,7 +18,15 @@ public class DBService : MonoBehaviour
         RequestEnable();
         void endAction() => RequestDisable().Forget();
 
-        return await DBConnect.VerifyLoginAsync(login, password, endAction);
+        (bool success, string error) = await DBConnect.VerifyLoginAsync(login, password, endAction);
+
+        await UniTask.SwitchToMainThread();
+        PopupService.instance.ShowPopup(error, PopupType.ok, success);
+
+        if (success)
+            StateController.AuthComplete?.Invoke();
+
+        return (success, error);
     }
 
     public async UniTask<(bool success, string error)> RegisterUserAsync(string login, string password)
@@ -29,7 +34,15 @@ public class DBService : MonoBehaviour
         RequestEnable();
         void endAction() => RequestDisable().Forget();
 
-        return await DBConnect.RegisterUserAsync(login, password, endAction);
+        (bool success, string error) = await DBConnect.RegisterUserAsync(login, password, endAction);
+
+        await UniTask.SwitchToMainThread();
+        PopupService.instance.ShowPopup(error, PopupType.ok, success);
+
+        if (success)
+            StateController.AuthComplete?.Invoke();
+
+        return (success, error);
     }
 
     private void RequestEnable()

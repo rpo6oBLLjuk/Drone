@@ -32,17 +32,20 @@ public class GamepadVibrationController
         if (strength <= 0 || duration <= 0)
             return;
 
-        gamepadService.Gamepad.SetMotorSpeeds(strength, strength / 2);
+        gamepadService.Gamepad?.SetMotorSpeeds(strength, strength / 2);
 
         VibrationOffDelay(duration, vibrationTokenSource).RunWithCancellation(vibrationTokenSource);
     }
 
     private async UniTask VibrationOffDelay(float duration, CancellationTokenSource source)
     {
-        await UniTask.WaitForSeconds(duration, cancellationToken: source.Token);
+        await UniTask.WaitForSeconds(duration, cancellationToken: source.Token, ignoreTimeScale: true);
 
-        gamepadService.Gamepad.PauseHaptics();
-        gamepadService.Gamepad.ResetHaptics();
+        if (gamepadService.Gamepad != null)
+        {
+            gamepadService.Gamepad.PauseHaptics();
+            gamepadService.Gamepad.ResetHaptics();
+        }
 
         Debug.Log("Вибрация завершена");
     }

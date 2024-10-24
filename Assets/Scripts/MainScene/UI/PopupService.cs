@@ -1,18 +1,23 @@
 using CustomInspector;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
-using UnityEngine.UIElements;
 
 public class PopupService : MonoBehaviour
 {
+    public static PopupService instance;
     [SerializeField] private CanvasGroup widget;
     [SerializeField] private ReorderableDictionary<PopupType, GameObject> popups;
 
     [SerializeField] private float animDuration;
     [SerializeField] private Color positivePopupColor;
     [SerializeField] private Color negativePopupColor;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     public void ShowPopup(string text, PopupType popupType, bool isPositive)
     {
@@ -23,11 +28,6 @@ public class PopupService : MonoBehaviour
             {
                 widget.blocksRaycasts = true;
                 widget.interactable = true;
-            })
-            .OnComplete(()=>
-            {
-                if(isPositive)
-                    StateController.AuthComplete?.Invoke();
             });
 
         SetText(text, popup);

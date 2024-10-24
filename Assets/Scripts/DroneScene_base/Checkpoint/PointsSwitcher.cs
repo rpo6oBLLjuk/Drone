@@ -45,24 +45,24 @@ public class PointsSwitcher
             point.SetPointInactive(inactiveColor);
         }
 
-        ActivatePoints(false);
+        ActivatePoints(true);
     }
 
-    public void PointGetted()
+    /// <summary>
+    /// Метод подбора чекпоинта
+    /// </summary>
+    /// <returns>Возвращаемое значение говорит о завершении игры (true - игра продолжается, false - чекпоинты кончились)</returns>
+    public bool PointGetted()
     {
-        Debug.LogWarning($"{GameStateController.GameEnded}");
-
         Point firstPoint = points.First();
-
         firstPoint.SetPointInactive(inactiveColor);
         points.Remove(firstPoint);
 
         Debug.Log("Собран чек-поинт");
-
-        ActivatePoints(true);
+        return ActivatePoints(false);
     }
 
-    private void ActivatePoints(bool enableAudio)
+    private bool ActivatePoints(bool systemCall)
     {
         if (points.Count > 0)
         {
@@ -79,12 +79,14 @@ public class PointsSwitcher
                 Debug.Log("Активирован последний чек-поинт");
             }
 
-            if (enableAudio)
+            if (systemCall)
                 checkpointService.audioService.PlayCheckpointCollected();
+
+            return true;
         }
         else
         {
-            if (enableAudio)
+            if (systemCall)
                 checkpointService.audioService.PlayLevelComplete();
 
             checkpointService.DroneInput.Drone.Disable();
@@ -92,6 +94,8 @@ public class PointsSwitcher
             GameStateController.End(true);
 
             Debug.Log("Уровень завершён");
+
+            return false;
         }
     }
 }

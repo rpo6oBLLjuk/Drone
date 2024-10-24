@@ -29,8 +29,10 @@ public class CheckpointService : MonoBehaviour, IDroneInputUser
         if (GameStateController.GameEnded)
             return;
 
-        pointsSwitcher.PointGetted();
-        levelTimeRecorder.PointGetted();
+        if (pointsSwitcher.PointGetted())
+        {
+            levelTimeRecorder.PointGetted();
+        }
 
         gamepadService.SetVibration();
     }
@@ -40,7 +42,7 @@ public class CheckpointService : MonoBehaviour, IDroneInputUser
         if (!inputStarted)
         {
             inputStarted = true;
-            levelTimeRecorder.Start(this);
+            levelTimeRecorder.StartRecord(this);
         }
     }
 

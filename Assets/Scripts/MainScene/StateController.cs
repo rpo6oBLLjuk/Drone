@@ -20,18 +20,32 @@ public class StateController : MonoBehaviour
     {
         AuthComplete -= LoadLevelSelectScene;
     }
+    
+    //Стоило бы вынести в Bootstrap
+    private void Start()
+    {
+        if(SaveService.LoadLocalUser() != null)
+        {
+            PopupService.instance.ShowPopup("Local Authentication completed", PopupType.ok, true);
+            LoadLevelSelectScene();
+        }
+    }
 
     private async void LoadLevelSelectScene()
     {
         loadingWidget.EnableWidget();
 
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(levelSelectSceneIndex);
+        await UniTask.SwitchToThreadPool();
+        await DBConnect.LoadAllLevelsDataAsync();
 
-        while (!asyncLoad.isDone)
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(levelSelectSceneIndex);
+        asyncLoad.allowSceneActivation = false;
+
+        while (asyncLoad.progress < 0.9f)
         {
             await UniTask.Yield();
         }
-        
+
         loadingWidget.DisableWidget();
         Debug.Log("Сцена выбора уровня загружена.");
 

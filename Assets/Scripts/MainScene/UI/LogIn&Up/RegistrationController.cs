@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -36,18 +35,13 @@ public class RegistrationController : MonoBehaviour
 
         if (passwordInputField1.GetText() != passwordInputField2.GetText())
         {
-            DBService.instance.popupService.ShowPopup("Passwords are different", PopupType.ok, false);
+            PopupService.instance.ShowPopup("Passwords are different", PopupType.ok, false);
             return;
         }
 
         regTask = new();
 
         (bool success, string error) = await DBService.instance.RegisterUserAsync(loginInputField.GetText(), passwordInputField1.GetText());
-
-        if (!success)
-            await UniTask.SwitchToMainThread();
-
-        DBService.instance.popupService.ShowPopup(error, PopupType.ok, success);
 
         regTask.SetResult(success);
     }
