@@ -1,0 +1,24 @@
+{
+    "name": "DroneScene",
+    "rootNamespace": "",
+    "references": [
+        "GUID:962f75d2a66ca3741815080a77b41adb",
+        "GUID:0d8beb7f090555447a6cf5ce9e54dbb4",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:3ae5734e49d646442ad24f37762ebdd2",
+        "GUID:02548b9c58aaa36408638b240eac201e",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:557e96720a552a0459069d391d3a32d6",
+        "GUID:084a44098916085428cadc4245f8beb9"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
